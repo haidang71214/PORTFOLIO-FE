@@ -1,187 +1,68 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react";
 import { toast } from "sonner";
 import { useLoginMutation } from "@/store/queries/auth";
 import { LoginRequest } from "@/types";
 
-/* ══════════════════════════════════════════════════════════
-   SCENE 1: IT / TECH (SPACE EXPLORATION)
-   Style: Orange/Red gradient, planets, floating rocks, big typography
-══════════════════════════════════════════════════════════ */
-function SceneSpace({ isActive }: { isActive: boolean }) {
-  return (
-    <div className={`scene-wrap scene-space ${isActive ? "is-active" : ""}`}>
-      {/* Background Gradient & Stars */}
-      <div className="layer layer-bg">
-        <div className="space-bg"></div>
-        <div className="space-stars"></div>
-      </div>
-
-      {/* Big Sun/Planet */}
-      <div className="layer layer-mid1">
-        <div className="space-sun"></div>
-      </div>
-
-      {/* Typography */}
-      <div className="layer layer-type">
-        <h2 className="space-title">BEYOND EARTH</h2>
-        <p className="space-sub">Software & Technology Portfolio</p>
-        <div className="glass-btn">Explore IT</div>
-      </div>
-
-      {/* Mountains / Landscape foreground */}
-      <div className="layer layer-mid2">
-        <svg viewBox="0 0 800 600" preserveAspectRatio="none" className="space-mountains">
-          <path d="M0,600 L0,450 L120,520 L250,400 L450,550 L600,350 L800,480 L800,600 Z" fill="#b91c1c" />
-          <path d="M0,600 L0,500 L180,560 L350,450 L550,580 L700,400 L800,520 L800,600 Z" fill="#991b1b" />
-          <path d="M0,600 L0,550 L200,600 L400,500 L600,600 L800,550 L800,600 Z" fill="#7f1d1d" />
-        </svg>
-      </div>
-
-      {/* Floating Rocks Foreground */}
-      <div className="layer layer-fg">
-        <div className="rock rock-1"></div>
-        <div className="rock rock-2"></div>
-        <div className="rock rock-3"></div>
-      </div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════
-   SCENE 2: DESIGN / ART (RED STATUE)
-   Style: Dark background, glowing red circle, classical statue shape
-══════════════════════════════════════════════════════════ */
-function SceneArt({ isActive }: { isActive: boolean }) {
-  return (
-    <div className={`scene-wrap scene-art ${isActive ? "is-active" : ""}`}>
-      {/* Dark textured BG */}
-      <div className="layer layer-bg">
-        <div className="art-bg"></div>
-      </div>
-
-      {/* Glowing Circles */}
-      <div className="layer layer-mid1">
-        <div className="art-circle-big"></div>
-        <div className="art-circle-small"></div>
-      </div>
-
-      {/* Typography */}
-      <div className="layer layer-type art-type-layout">
-        <span className="art-tag">OUR VERSION</span>
-        <h2 className="art-title">DESIGN</h2>
-        <p className="art-sub">
-          Our hobby is a modern and convenient design, the key to successful communication.
-        </p>
-        <div className="art-line"></div>
-      </div>
-
-      {/* Foreground Statue Silhouette (SVG approach) */}
-      <div className="layer layer-fg">
-        {/* We use an SVG path to simulate the classic statue bust silhouette */}
-        <svg viewBox="0 0 400 600" className="art-statue">
-          <filter id="red-tint">
-             <feColorMatrix type="matrix" values="
-               1.2 0 0 0 0.2
-               0 0.1 0 0 0
-               0 0.1 0 0 0
-               0 0 0 1 0" />
-          </filter>
-          <path d="M200,50 C180,50 160,70 165,100 C150,110 145,130 155,160 C140,190 145,230 170,250 C160,280 150,330 140,360 C120,400 90,450 80,500 L80,600 L350,600 L340,500 C330,440 310,380 280,320 C270,260 265,220 270,180 C280,150 270,110 250,90 C255,70 230,50 200,50 Z" 
-                fill="#551111" filter="url(#red-tint)" stroke="#ff4444" strokeWidth="2" strokeOpacity="0.3" />
-          {/* Subtle details */}
-          <path d="M165,100 Q180,120 200,110" stroke="#ff4444" strokeWidth="2" fill="none" opacity="0.5"/>
-          <path d="M155,160 Q170,180 210,160" stroke="#ff4444" strokeWidth="3" fill="none" opacity="0.4"/>
-          <path d="M170,250 Q200,280 250,240" stroke="#ff4444" strokeWidth="4" fill="none" opacity="0.3"/>
-          <path d="M140,360 Q180,390 280,320" stroke="#ff4444" strokeWidth="6" fill="none" opacity="0.2"/>
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════
-   SCENE 3: MEDIA / LIFESTYLE (LAKE & MOUNTAINS)
-   Style: Pink/Purple evening sky, layered vector mountains, lake reflection
-══════════════════════════════════════════════════════════ */
-function SceneLandscape({ isActive }: { isActive: boolean }) {
-  return (
-    <div className={`scene-wrap scene-landscape ${isActive ? "is-active" : ""}`}>
-      {/* Sky */}
-      <div className="layer layer-bg">
-        <div className="land-sky"></div>
-        <div className="land-sun"></div>
-      </div>
-
-      {/* Far Mountains */}
-      <div className="layer layer-mid1">
-        <svg viewBox="0 0 1000 600" preserveAspectRatio="none" className="land-mount-far">
-          <path d="M0,600 L0,300 L150,150 L250,280 L350,100 L500,320 L650,180 L800,350 L1000,200 L1000,600 Z" fill="#6d28d9" opacity="0.6"/>
-        </svg>
-      </div>
-
-      {/* Mid Mountains */}
-      <div className="layer layer-mid2">
-        <svg viewBox="0 0 1000 600" preserveAspectRatio="none" className="land-mount-mid">
-          <path d="M0,600 L0,350 L200,200 L380,380 L600,150 L750,350 L1000,280 L1000,600 Z" fill="#4c1d95" opacity="0.8"/>
-        </svg>
-      </div>
-
-      {/* Lake / Ground */}
-      <div className="layer layer-mid3">
-        <div className="land-lake"></div>
-      </div>
-
-      {/* Typography */}
-      <div className="layer layer-type land-type-layout">
-        <h2 className="land-title">IDEAL<br/>LIFE <span className="land-date">5/31</span></h2>
-        <p className="land-sub">
-          Unconstrained life, tea and wine tasting with friends, watching the sunset, enjoying the quietness.
-        </p>
-        <div className="glass-btn land-btn">VIEW</div>
-      </div>
-
-      {/* Foreground: Trees / Cabin / Boat */}
-      <div className="layer layer-fg">
-        <svg viewBox="0 0 1000 600" preserveAspectRatio="none" className="land-fg-elements">
-          {/* Trees left */}
-          <path d="M0,600 L0,450 L20,400 L40,460 L60,380 L80,470 L100,420 L150,600 Z" fill="#2e1065" />
-          {/* Cabin right */}
-          <path d="M700,500 L750,350 L800,500 Z" fill="#9f1239" />
-          <rect x="720" y="500" width="60" height="50" fill="#4c0519" />
-          <polygon points="700,500 750,480 800,500" fill="#be123c" />
-          {/* Boat center */}
-          <path d="M300,550 Q400,580 550,540 L500,520 Q400,530 350,520 Z" fill="#f43f5e" />
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════
-   MAIN PAGE COMPONENT
-══════════════════════════════════════════════════════════ */
 export default function LoginPage() {
   const router = useRouter();
   const [loginMutation, { isLoading }] = useLoginMutation();
   const [form, setForm] = useState<LoginRequest>({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
-  
-  // Carousel State
+  const [remember, setRemember] = useState(false);
+
+  // Carousel Refs & States
+  const sliderRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const TOTAL_SLIDES = 3;
+  const [scrollOffsets, setScrollOffsets] = useState<number[]>([0, 0, 0]);
+
+  const handleScroll = () => {
+    if (!sliderRef.current) return;
+    const scrollPos = sliderRef.current.scrollTop;
+    const height = sliderRef.current.clientHeight || 1;
+    const currentActive = Math.round(scrollPos / height);
+    if (currentActive !== activeIndex) {
+      setActiveIndex(currentActive);
+    }
+
+    // Simple parallax effect calculations
+    const newOffsets = [0, 0, 0];
+    const scenes = sliderRef.current.querySelectorAll(".scene");
+    scenes.forEach((scene, index) => {
+      const rect = scene.getBoundingClientRect();
+      const windowHeight = window.innerHeight || 800;
+      if (rect.top < windowHeight && rect.bottom > 0) {
+        const offsetVal = (rect.top / windowHeight) * 100;
+        newOffsets[index] = offsetVal * 0.25;
+      }
+    });
+    setScrollOffsets(newOffsets);
+  };
+
+  const scrollToScene = (index: number) => {
+    if (!sliderRef.current) return;
+    const height = sliderRef.current.clientHeight || window.innerHeight;
+    sliderRef.current.scrollTo({
+      top: index * height,
+      behavior: "smooth",
+    });
+  };
 
   useEffect(() => {
-    // Auto-slide every 7 seconds
+    // Initial calculation on mount
+    handleScroll();
+    
+    // Auto-scroll loop every 7 seconds as in original design
     const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % TOTAL_SLIDES);
+      const nextIndex = (activeIndex + 1) % 3;
+      scrollToScene(nextIndex);
     }, 7000);
+
     return () => clearInterval(interval);
-  }, []);
+  }, [activeIndex]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -198,106 +79,246 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="login-root">
-      
-      {/* ══════════════════════════════════════
-          LEFT PANEL — Parallax Slider
-      ══════════════════════════════════════ */}
-      <div className="login-left-slider">
-        {/* Brand Overlay */}
-        <div className="slider-brand">
-          <span className="brand-gem">◆</span>
-          <span className="brand-name">PortfolioHub</span>
+    <div className="bg-auth-main text-on-surface selection:bg-primary-container selection:text-white min-h-screen overflow-hidden font-body-md">
+      {/* Top Header */}
+      <header className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-gutter py-4 backdrop-blur-md bg-surface/5">
+        <div className="font-display-lg-mobile text-display-lg-mobile font-bold tracking-tighter text-on-surface">
+          Portfolio
         </div>
+      </header>
 
-        {/* Sliding Track */}
-        <div 
-          className="slider-track"
-          style={{ transform: `translateY(-${activeIndex * 100}vh)` }}
-        >
-          <div className="slide-section"><SceneSpace isActive={activeIndex === 0} /></div>
-          <div className="slide-section"><SceneArt isActive={activeIndex === 1} /></div>
-          <div className="slide-section"><SceneLandscape isActive={activeIndex === 2} /></div>
-        </div>
+      <main className="flex h-screen w-full">
+        {/* Left Slider: Vertical snappable carousel */}
+        <section className="hidden md:block flex-1 relative overflow-hidden">
+          <div 
+            ref={sliderRef} 
+            onScroll={handleScroll}
+            className="slider-container h-full w-full overflow-y-auto no-scrollbar" 
+            id="main-slider"
+          >
+            {/* Scene 1: Beyond Earth */}
+            <div className="scene relative h-full w-full flex items-center justify-center">
+              <img 
+                className="absolute inset-0 w-full h-full object-cover brightness-[0.6] transition-transform duration-100 ease-out" 
+                style={{ transform: `translateY(${scrollOffsets[0]}px)` }}
+                alt="A cinematic space landscape titled Beyond Earth with a massive glowing orange sun setting over jagged red crystalline mountains. The deep purple sky is filled with swirling nebulae and shimmering stars, creating a sense of infinite wonder. The lighting is dramatic and warm, contrasting with the cold dark of space, in a high-fidelity artistic style." 
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAULXIk87wf-5AND7nMde0-SBpaOjF-GgmTgUp99oL-l1Wy031jQefYUyFG64qv6UQ5niInSMOV4RqBvn71hTysUaLitQCBZC40jJh5_3oDdYIFc7FfDoqGmWlozLs1DtS9rf9oLiLK--KsXm5DBA4kf--dd0QGSLPYNwSqWAKBAj_3787Nwy7POYCRkNJUD13RvLRXuwF3MYNMFg0Q4JYOOb4iHWediYOpG1NV91WtQXWqkYNtiO_YTsdKwr4TSnFUvPFZEHHGtg"
+              />
+              <div className="relative z-10 text-center px-12">
+                <span className="font-label-caps text-label-caps text-secondary mb-2 block tracking-[0.3em]">CHAPTER 01</span>
+                <h2 className="font-display-art text-display-art italic text-white mb-4">Beyond Earth</h2>
+                <div className="w-12 h-[1px] bg-outline-variant mx-auto mb-6"></div>
+                <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto opacity-80">Exploring the silent geometry of the cosmos through a lens of technical precision.</p>
+              </div>
+              {/* Technical Accents */}
+              <div className="absolute bottom-12 left-12 border-l border-t border-white/20 w-8 h-8"></div>
+              <div className="absolute bottom-12 right-12 border-r border-t border-white/20 w-8 h-8"></div>
+            </div>
 
-        {/* Pagination Dots */}
-        <div className="slider-pagination">
-          {[0, 1, 2].map((i) => (
-            <button 
-              key={i} 
-              className={`dot ${i === activeIndex ? "active" : ""}`}
-              onClick={() => setActiveIndex(i)}
-              aria-label={`Go to slide ${i + 1}`}
-            />
-          ))}
-        </div>
-      </div>
+            {/* Scene 2: Artistic Geometry */}
+            <div className="scene relative h-full w-full flex items-center justify-center">
+              <img 
+                className="absolute inset-0 w-full h-full object-cover brightness-[0.5] transition-transform duration-100 ease-out" 
+                style={{ transform: `translateY(${scrollOffsets[1]}px)` }}
+                alt="A modern minimalist art gallery scene titled Design featuring a stark silhouette of a classical Greek statue positioned before a large glowing red neon circle on a dark charcoal wall. The floor is a reflective obsidian surface that catches the crimson light. The atmosphere is sophisticated and moody, emphasizing clean lines and high-contrast artistic composition." 
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIUriKGxmkCWnM98xqOCnuwgz1abhrSKB6QB8Ri0f4aGUfJnP-Vtqo3jc6Uvrrhlfv867Z5HcG_oUI_ZhJJI1f-wGMJDcBIxW312UCyoP7t6oFSUX1GTEcBn_8rRE57Ur9gxpbqUeSAmG6jzlKfYDmu7lkd2sze8MafRs7UObczA4Zchm2TJeSOqeRcbz2-XbMgvhpVanYpgrqZeSSGuQv0FxGLlQ5RmvgNR5SQu-vBQoDJsVBPZbyb6TAH5TnYzYULJntRNhBSw"
+              />
+              <div className="relative z-10 text-center px-12">
+                <span className="font-label-caps text-label-caps text-tertiary mb-2 block tracking-[0.3em]">CHAPTER 02</span>
+                <h2 className="font-display-art text-display-art italic text-white mb-4">Artistic Geometry</h2>
+                <div className="w-12 h-[1px] bg-outline-variant mx-auto mb-6"></div>
+                <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto opacity-80">Where classical aesthetics intersect with modern digital luminance.</p>
+              </div>
+            </div>
 
-      {/* ══════════════════════════════════════
-          RIGHT PANEL — Fixed Login Form
-      ══════════════════════════════════════ */}
-      <div className="login-right-fixed">
-        <div className="login-form-card animate-fade-in-up">
-          <div className="form-header">
-            <div className="form-logo">◆</div>
-            <h1 className="form-title">Chào mừng trở lại</h1>
-            <p className="form-sub">Đăng nhập để quản lý portfolio đa lĩnh vực của bạn.</p>
+            {/* Scene 3: Ideal Life */}
+            <div className="scene relative h-full w-full flex items-center justify-center">
+              <img 
+                className="absolute inset-0 w-full h-full object-cover brightness-[0.6] transition-transform duration-100 ease-out" 
+                style={{ transform: `translateY(${scrollOffsets[2]}px)` }}
+                alt="A serene dreamlike landscape titled Ideal Life with towering purple mountains reflected in a perfectly still, deep blue lake at twilight. A small, lone wooden boat floats quietly in the center of the water. The sky is a soft gradient of indigo and violet, evoking a peaceful, surreal mood. The style is cinematic and painterly, highlighting the quiet beauty of nature." 
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvp7-EcABh475IGB0QyMeiI5xAM6WJMqJ4MqT8LmHjpuWPOHdAyV-awUTGS2TinJpcHnURxdm3LLDQjSfdMZXSV4pRF8ELI4M-MNEcwesJkDY1FYX4ctUOtjToNYkSM4KgXzkWNVk7D4ypGQPnT3A_lei0PSsh4zizSJ23v_rCNqECIUGyImnlm6UtCDD5-XwTWfzKYmTJcAOwfBnPoJa9vAlvKHC0i_bseGIpwpoZwQHgOkOGho8KaopuEL0jQPraxVITtR7RRw"
+              />
+              <div className="relative z-10 text-center px-12">
+                <span className="font-label-caps text-label-caps text-primary mb-2 block tracking-[0.3em]">CHAPTER 03</span>
+                <h2 className="font-display-art text-display-art italic text-white mb-4">Ideal Life</h2>
+                <div className="w-12 h-[1px] bg-outline-variant mx-auto mb-6"></div>
+                <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto opacity-80">A tranquil synthesis of natural forms and digital serenity.</p>
+              </div>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="auth-form">
-            <div className="input-group">
-              <label htmlFor="login-email" className="input-label">Email</label>
-              <div className="input-wrapper">
-                <Mail className="input-icon" size={17} />
-                <input
-                  id="login-email" type="email" name="email"
-                  placeholder="you@example.com"
-                  value={form.email} onChange={handleChange}
-                  required autoComplete="email" className="auth-input"
-                />
-              </div>
-            </div>
+          {/* Custom Scroll Indicator */}
+          <div className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-20">
+            {[0, 1, 2].map((i) => (
+              <button 
+                key={i} 
+                className={`rounded-full transition-all duration-300 cursor-pointer ${
+                  i === activeIndex 
+                    ? "bg-primary w-1.5 h-12" 
+                    : "bg-white/20 w-1.5 h-8 hover:bg-white/40"
+                }`}
+                onClick={() => scrollToScene(i)}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
+          </div>
+        </section>
 
-            <div className="input-group">
-              <label htmlFor="login-password" className="input-label">Mật khẩu</label>
-              <div className="input-wrapper">
-                <Lock className="input-icon" size={17} />
-                <input
-                  id="login-password"
-                  type={showPassword ? "text" : "password"}
-                  name="password" placeholder="••••••••"
-                  value={form.password} onChange={handleChange}
-                  required autoComplete="current-password" className="auth-input"
+        {/* Right Side: Fixed Sidebar Login Form */}
+        <aside className="w-full md:w-auth-card-width bg-surface-container-lowest flex flex-col items-center justify-center px-10 relative z-10">
+          <div className="w-full max-w-[340px] flex flex-col gap-stack-lg my-auto pt-20 pb-28">
+            <header className="flex flex-col gap-2">
+              <h1 className="font-headline-md text-headline-md text-white">Chào mừng trở lại</h1>
+              <p className="font-body-md text-body-md text-on-surface-variant">Vui lòng nhập thông tin để truy cập bộ sưu tập của bạn.</p>
+            </header>
+
+            <form className="flex flex-col gap-stack-md" onSubmit={handleSubmit}>
+              {/* Email Field */}
+              <div className="flex flex-col gap-2">
+                <label className="font-label-caps text-label-caps text-on-surface-variant opacity-70" htmlFor="email">
+                  EMAIL ARCHIVE
+                </label>
+                <div className="relative group">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-secondary transition-colors select-none">
+                    mail
+                  </span>
+                  <input 
+                    className="w-full bg-surface-container-high/40 border-outline-variant/30 rounded-lg py-4 pl-12 pr-4 text-white focus:ring-0 focus:border-secondary/50 focus:bg-surface-container-high transition-all ghost-border outline-none" 
+                    id="email" 
+                    name="email"
+                    type="email" 
+                    required 
+                    autoComplete="email"
+                    placeholder="artist@aetheria.com"
+                    value={form.email}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between items-end">
+                  <label className="font-label-caps text-label-caps text-on-surface-variant opacity-70" htmlFor="password">
+                    PASSWORD KEY
+                  </label>
+                  <Link className="font-label-caps text-[10px] text-primary hover:text-white transition-colors" href="/auth/forgot-password">
+                    QUÊN MẬT KHẨU?
+                  </Link>
+                </div>
+                <div className="relative group">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors select-none">
+                    lock
+                  </span>
+                  <input 
+                    className="w-full bg-surface-container-high/40 border-outline-variant/30 rounded-lg py-4 pl-12 pr-12 text-white focus:ring-0 focus:border-primary/50 focus:bg-surface-container-high transition-all ghost-border outline-none" 
+                    id="password" 
+                    name="password"
+                    type={showPassword ? "text" : "password"} 
+                    required 
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={handleChange}
+                  />
+                  <button 
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-white transition-colors flex items-center justify-center p-1" 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label="Toggle password visibility"
+                  >
+                    <span className="material-symbols-outlined select-none">
+                      {showPassword ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 py-2">
+                <input 
+                  className="w-4 h-4 rounded border-outline-variant bg-transparent text-primary focus:ring-primary/20 cursor-pointer" 
+                  id="remember" 
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
                 />
-                <button
-                  type="button" className="eye-btn"
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-label="Toggle password visibility"
+                <label className="font-body-md text-[14px] text-on-surface-variant cursor-pointer select-none" htmlFor="remember">
+                  Ghi nhớ phiên đăng nhập
+                </label>
+              </div>
+
+              <button 
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-4 rounded-lg bg-gradient-to-r from-primary-container to-inverse-primary text-white font-headline-md text-body-lg font-semibold primary-glow hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                {isLoading ? (
+                  <span className="btn-spinner" />
+                ) : (
+                  <>
+   Đăng nhập
+                  </>
+                )}
+              </button>
+            </form>
+
+            <footer className="flex flex-col gap-6 pt-4">
+              <div className="relative flex items-center">
+                <div className="flex-grow border-t border-outline-variant/20"></div>
+                <span className="flex-shrink mx-4 font-label-caps text-[10px] text-outline select-none">HOẶC TIẾP TỤC VỚI</span>
+                <div className="flex-grow border-t border-outline-variant/20"></div>
+              </div>
+
+              <div className="flex gap-4">
+                <button 
+                  type="button"
+                  className="flex-1 glass-panel py-3 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors text-on-surface"
                 >
-                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                    <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.132,0-5.671-2.54-5.671-5.671 s2.539-5.671,5.671-5.671c1.423,0,2.711,0.516,3.703,1.371l2.817-2.817C17.23,3.537,15.011,2.5,12.545,2.5 c-5.247,0-9.5,4.253-9.5,9.5s4.253,9.5,9.5,9.5c5.445,0,9.5-3.834,9.5-9.5c0-0.516-0.052-1.016-0.149-1.499H12.545z" fill="currentColor"></path>
+                  </svg>
+                  <span className="font-label-caps text-[11px] select-none">GOOGLE</span>
+                </button>
+                <button 
+                  type="button"
+                  className="flex-1 glass-panel py-3 rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors text-on-surface"
+                >
+                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                    <path d="M12,2C6.477,2,2,6.477,2,12c0,5.013,3.693,9.153,8.505,9.876V14.659H8.031v-2.659h2.474v-2.029 c0-2.441,1.454-3.79,3.679-3.79c1.066,0,2.181,0.19,2.181,0.19v2.397h-1.228c-1.209,0-1.583,0.75-1.583,1.517v1.714h2.701l-0.432,2.659 h-2.269v7.217C18.307,21.153,22,17.013,22,12C22,6.477,17.523,2,12,2z" fill="currentColor"></path>
+                  </svg>
+                  <span className="font-label-caps text-[11px] select-none">FACEBOOK</span>
                 </button>
               </div>
-              <div className="forgot-link-wrapper">
-                <Link href="/auth/forgot-password" className="forgot-link">
-                  Quên mật khẩu?
+
+              <p className="text-center font-body-md text-[13px] text-on-surface-variant">
+                Chưa có tài khoản?{" "}
+                <Link className="text-secondary font-semibold hover:underline" href="/auth/register">
+                  Tạo tài khoản mới
                 </Link>
-              </div>
+              </p>
+            </footer>
+          </div>
+
+          {/* Footer Section */}
+          <div className="absolute bottom-0 left-0 w-full py-8 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center px-container-padding gap-stack-md bg-surface-container-lowest z-20">
+            <span className="font-label-caps text-label-caps text-on-surface-variant text-[11px] text-center md:text-left select-none">
+              © 2026 Aetheria Studios. Precision in Art.
+            </span>
+            <div className="flex gap-4">
+              <Link className="font-label-caps text-label-caps text-on-surface-variant text-[11px] hover:text-secondary transition-colors" href="#">
+                Privacy
+              </Link>
+              <Link className="font-label-caps text-label-caps text-on-surface-variant text-[11px] hover:text-secondary transition-colors" href="#">
+                Terms
+              </Link>
+              <Link className="font-label-caps text-label-caps text-on-surface-variant text-[11px] hover:text-secondary transition-colors" href="#">
+                Contact
+              </Link>
             </div>
-
-            <button id="login-submit" type="submit" disabled={isLoading} className="auth-btn active-press">
-              {isLoading ? <span className="btn-spinner" /> : <><LogIn size={17} /> Đăng nhập</>}
-            </button>
-          </form>
-
-          <div className="auth-divider"><span>hoặc</span></div>
-
-          <p className="auth-footer">
-            Chưa có tài khoản?{" "}
-            <Link href="/auth/register" className="auth-link">Đăng ký ngay</Link>
-          </p>
-        </div>
-      </div>
-
+          </div>
+        </aside>
+      </main>
     </div>
   );
 }

@@ -1,465 +1,49 @@
 /* =============================================
-   AUTH PAGES — Parallax Storytelling Edition
+   AUTH PAGES — Aetheria Portfolio Edition
    ============================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Syncopate:wght@700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Sora:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
-/* ─── Reset & root ─── */
-.login-root {
-  display: flex;
-  min-height: 100dvh;
-  background: #050410;
-  overflow: hidden;
-  font-family: 'Inter', sans-serif;
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
 }
 
-/* ══════════════════════════════════
-   LEFT PANEL — Slider Container
-══════════════════════════════════ */
-.login-left-slider {
-  position: relative;
-  flex: 1;
-  height: 100dvh;
-  overflow: hidden;
+.glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Brand Overlay (Fixed on top of slider) */
-.slider-brand {
-  position: absolute;
-  top: 2rem;
-  left: 2.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  z-index: 100;
+.ghost-border {
+  border: 1px solid transparent;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)), linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
 }
 
-.brand-gem {
-  color: #fff;
-  font-size: 1.2rem;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+.slider-container {
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
 }
 
-.brand-name {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.5px;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+.slider-container::-webkit-scrollbar {
+  display: none;
 }
 
-/* Pagination Dots */
-.slider-pagination {
-  position: absolute;
-  right: 2.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  z-index: 100;
+.scene {
+  scroll-snap-align: start;
 }
 
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  border: 2px solid transparent;
-  cursor: pointer;
-  padding: 0;
-  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+.primary-glow {
+  box-shadow: 0px 10px 30px rgba(147, 51, 234, 0.4);
 }
 
-.dot:hover {
-  background: rgba(255, 255, 255, 0.6);
-  transform: scale(1.2);
+.bg-auth-main {
+  background-color: #050410;
 }
 
-.dot.active {
-  background: #fff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-  transform: scale(1.4);
-}
-
-/* ── Slider Track ── */
-.slider-track {
-  width: 100%;
-  height: 100%;
-  transition: transform 1.2s cubic-bezier(0.65, 0, 0.15, 1);
-  will-change: transform;
-}
-
-.slide-section {
-  width: 100%;
-  height: 100vh;
-  position: relative;
-  overflow: hidden;
-}
-
-/* ══════════════════════════════════
-   SCENE WRAPPER & LAYER LOGIC
-══════════════════════════════════ */
-.scene-wrap {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.layer {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  transition: transform 1.4s cubic-bezier(0.25, 1, 0.3, 1), opacity 1.4s ease;
-  will-change: transform, opacity;
-}
-
-/* Parallax starting states (Slide is inactive) */
-.scene-wrap .layer-bg   { transform: translateY(5%); opacity: 0.2; }
-.scene-wrap .layer-mid1 { transform: translateY(15%); opacity: 0; }
-.scene-wrap .layer-mid2 { transform: translateY(25%); opacity: 0; }
-.scene-wrap .layer-mid3 { transform: translateY(35%); opacity: 0; }
-.scene-wrap .layer-fg   { transform: translateY(50%); opacity: 0; }
-.scene-wrap .layer-type { transform: translateY(-20px); opacity: 0; }
-
-/* Parallax active states */
-.scene-wrap.is-active .layer-bg   { transform: translateY(0); opacity: 1; transition-delay: 0s; }
-.scene-wrap.is-active .layer-mid1 { transform: translateY(0); opacity: 1; transition-delay: 0.1s; }
-.scene-wrap.is-active .layer-mid2 { transform: translateY(0); opacity: 1; transition-delay: 0.2s; }
-.scene-wrap.is-active .layer-mid3 { transform: translateY(0); opacity: 1; transition-delay: 0.3s; }
-.scene-wrap.is-active .layer-fg   { transform: translateY(0); opacity: 1; transition-delay: 0.4s; }
-.scene-wrap.is-active .layer-type { transform: translateY(0); opacity: 1; transition-delay: 0.5s; pointer-events: auto; }
-
-
-/* ══════════════════════════════════════════════════════════
-   SCENE 1: IT / TECH (SPACE)
-══════════════════════════════════════════════════════════ */
-.scene-space {
-  background: #1e0915;
-}
-
-.space-bg {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(180deg, #180512 0%, #3e122b 50%, #892837 100%);
-}
-
-.space-stars {
-  position: absolute;
-  inset: 0;
-  background-image: 
-    radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
-    radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.8), rgba(0,0,0,0));
-  background-repeat: repeat;
-  background-size: 150px 150px;
-  opacity: 0.6;
-}
-
-.space-sun {
-  position: absolute;
-  bottom: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 400px;
-  height: 400px;
-  background: linear-gradient(180deg, #f97316 0%, #ef4444 100%);
-  border-radius: 50%;
-  box-shadow: 0 0 100px #f97316, 0 0 200px rgba(249, 115, 22, 0.5);
-}
-
-.space-mountains {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 50vh;
-}
-
-.space-title {
-  font-family: 'Syncopate', sans-serif;
-  font-size: 4rem;
-  color: #fff;
-  text-align: center;
-  margin-top: 25vh;
-  letter-spacing: 4px;
-  text-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  line-height: 1.1;
-}
-
-.space-sub {
-  text-align: center;
-  color: rgba(255,255,255,0.8);
-  font-size: 1.1rem;
-  letter-spacing: 2px;
-  margin-top: 1rem;
-}
-
-.glass-btn {
-  width: fit-content;
-  margin: 2rem auto;
-  padding: 0.8rem 2rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50px;
-  color: #fff;
-  font-weight: 600;
-  backdrop-filter: blur(10px);
-  cursor: pointer;
-  transition: background 0.3s, transform 0.3s;
-}
-
-.glass-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-}
-
-/* Floating rocks */
-.rock {
-  position: absolute;
-  background: linear-gradient(135deg, #451a24, #1a0810);
-  border-radius: 10px 30px 15px 40px;
-  box-shadow: 10px 20px 30px rgba(0,0,0,0.6), inset 2px 2px 5px rgba(255,255,255,0.1);
-  animation: floatRock 8s infinite alternate ease-in-out;
-}
-.rock-1 { width: 80px; height: 60px; bottom: 20%; left: 10%; transform: rotate(15deg); }
-.rock-2 { width: 120px; height: 90px; bottom: 10%; right: 5%; transform: rotate(-20deg); animation-delay: -3s; }
-.rock-3 { width: 50px; height: 40px; top: 40%; left: 20%; transform: rotate(45deg); filter: blur(2px); animation-delay: -1s; }
-
-@keyframes floatRock {
-  0% { transform: translateY(0) rotate(0deg); }
-  100% { transform: translateY(-30px) rotate(10deg); }
-}
-
-
-/* ══════════════════════════════════════════════════════════
-   SCENE 2: DESIGN / ART
-══════════════════════════════════════════════════════════ */
-.scene-art {
-  background: #111;
-}
-
-.art-bg {
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at 70% 50%, #301010 0%, #111 70%);
-}
-
-.art-circle-big {
-  position: absolute;
-  top: 50%;
-  left: 65%;
-  transform: translate(-50%, -50%);
-  width: 600px;
-  height: 600px;
-  background: #b91c1c;
-  border-radius: 50%;
-  box-shadow: 0 0 100px rgba(185, 28, 28, 0.3);
-}
-
-.art-circle-small {
-  position: absolute;
-  bottom: 10%;
-  left: 30%;
-  width: 150px;
-  height: 150px;
-  background: #dc2626;
-  border-radius: 50%;
-  box-shadow: 0 0 40px rgba(220, 38, 38, 0.4);
-}
-
-.art-statue {
-  position: absolute;
-  bottom: 0;
-  left: 55%;
-  transform: translateX(-50%);
-  height: 85vh;
-  filter: drop-shadow(-20px 0 30px rgba(0,0,0,0.8));
-}
-
-.art-type-layout {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-left: 15%;
-  width: 50%;
-}
-
-.art-tag {
-  font-size: 0.8rem;
-  letter-spacing: 2px;
-  color: #fff;
-  opacity: 0.7;
-  margin-bottom: 1rem;
-}
-
-.art-title {
-  font-size: 5rem;
-  font-weight: 800;
-  color: #fff;
-  margin: 0 0 1rem;
-  letter-spacing: -2px;
-  line-height: 1;
-}
-
-.art-sub {
-  font-size: 1rem;
-  color: #aaa;
-  line-height: 1.6;
-  max-width: 300px;
-  margin-bottom: 2rem;
-}
-
-.art-line {
-  width: 60px;
-  height: 2px;
-  background: #fff;
-}
-
-
-/* ══════════════════════════════════════════════════════════
-   SCENE 3: MEDIA / LANDSCAPE
-══════════════════════════════════════════════════════════ */
-.scene-landscape {
-  background: #2e1065;
-}
-
-.land-sky {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(180deg, #1e1b4b 0%, #4c1d95 40%, #be123c 80%, #f43f5e 100%);
-}
-
-.land-sun {
-  position: absolute;
-  top: 20%;
-  right: 15%;
-  width: 100px;
-  height: 100px;
-  background: #fbbf24;
-  border-radius: 50%;
-  box-shadow: 0 0 50px rgba(251, 191, 36, 0.6);
-}
-
-.land-mount-far {
-  position: absolute;
-  bottom: 30%;
-  width: 100%;
-  height: 40vh;
-}
-
-.land-mount-mid {
-  position: absolute;
-  bottom: 15%;
-  width: 100%;
-  height: 45vh;
-}
-
-.land-lake {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 25vh;
-  background: linear-gradient(180deg, #0f172a 0%, #0891b2 100%);
-  opacity: 0.9;
-}
-
-.land-fg-elements {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 60vh;
-}
-
-.land-type-layout {
-  padding: 10% 10%;
-}
-
-.land-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 5.5rem;
-  line-height: 0.9;
-  color: #fff;
-  margin: 0 0 1rem;
-  text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-}
-
-.land-date {
-  font-size: 1.5rem;
-  vertical-align: text-bottom;
-  font-family: 'Inter', sans-serif;
-  opacity: 0.8;
-  margin-left: 10px;
-}
-
-.land-sub {
-  font-size: 0.95rem;
-  color: rgba(255,255,255,0.8);
-  max-width: 400px;
-  line-height: 1.6;
-  border-top: 1px solid rgba(255,255,255,0.3);
-  padding-top: 1rem;
-}
-
-.land-btn {
-  margin: 2rem 0 0 0;
-  background: #fff;
-  color: #1e1b4b;
-  border: none;
-}
-
-
-/* ══════════════════════════════════════════════════════════
-   RIGHT PANEL — FIXED FORM
-══════════════════════════════════════════════════════════ */
-.login-right-fixed {
-  flex: 0 0 440px;
-  height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 2.5rem;
-  background: #050410;
-  border-left: 1px solid rgba(255, 255, 255, 0.05);
-  position: relative;
-  z-index: 200;
-}
-
-.login-form-card {
-  width: 100%;
-  max-width: 360px;
-}
-
-.form-header {
-  margin-bottom: 2.5rem;
-}
-
-.form-logo {
-  color: #7c3aed;
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
-  display: inline-block;
-  filter: drop-shadow(0 0 12px rgba(124, 58, 237, 0.6));
-}
-
-.form-title {
-  font-size: 1.7rem;
-  font-weight: 700;
-  color: #f0f0ff;
-  margin: 0 0 0.5rem;
-  letter-spacing: -0.5px;
-}
-
-.form-sub {
-  font-size: 0.88rem;
-  color: rgba(200, 200, 230, 0.5);
-  margin: 0;
-  line-height: 1.4;
-}
-
-/* ─── Shared form elements ─── */
+/* ─── Shared form elements (Used for register and forgot-password pages) ─── */
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -663,30 +247,3 @@
 .auth-header { text-align: center; margin-bottom: 2rem; }
 .auth-title { font-size: 1.6rem; font-weight: 700; color: #f0f0ff; margin: 0 0 0.4rem; }
 .auth-subtitle { font-size: 0.88rem; color: rgba(200, 200, 230, 0.55); margin: 0; }
-
-/* ══════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════ */
-@media (max-width: 1024px) {
-  .login-right-fixed { flex: 0 0 380px; padding: 2rem 1.5rem; }
-  .space-title { font-size: 3rem; }
-  .land-title { font-size: 4rem; }
-  .art-title { font-size: 4rem; }
-}
-
-@media (max-width: 850px) {
-  .login-root { flex-direction: column; }
-  .login-left-slider {
-    flex: none;
-    height: 60dvh;
-  }
-  .login-right-fixed {
-    flex: none;
-    height: auto;
-    border-left: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 2rem 1.5rem;
-    width: 100%;
-  }
-  .login-form-card { margin: 0 auto; }
-}
