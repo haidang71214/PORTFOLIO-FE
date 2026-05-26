@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { Providers } from "./providers";
 import { siteConfig } from "../config/site";
 import { fontSans, fontMono } from "../config/fonts";
+import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
   title: {
@@ -35,13 +36,18 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
       <body
         suppressHydrationWarning
         className={clsx(
-          "min-h-screen font-sans antialiased bg-gray-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50",
+          "min-h-screen font-sans antialiased bg-background text-foreground",
           fontSans.variable,
           fontMono.variable
         )}
       >
         <Providers>
-          {children}
+          <div className="relative flex flex-col min-h-screen">
+            <Navbar />
+            <main className="w-full flex-grow pt-16">
+              {children}
+            </main>
+          </div>
           <Toaster richColors position="bottom-right" />
         </Providers>
       </body>

@@ -36,14 +36,12 @@ const config = {
         "primary-fixed": "#f0dbff",
         "on-primary-container": "#f6e6ff",
         "surface-container-highest": "#353342",
-        "primary": "#ddb8ff",
         "on-primary-fixed-variant": "#6800b4",
         "outline-variant": "#4d4354",
         "tertiary-fixed-dim": "#ffb4ab",
         "secondary-fixed": "#ffdbd0",
         "on-primary": "#490080",
         "surface-dim": "#131220",
-        "secondary": "#ffb59e",
         "primary-fixed-dim": "#ddb8ff",
         "surface": "#131220",
         "inverse-primary": "#861fdd",
@@ -56,7 +54,6 @@ const config = {
         "on-surface-variant": "#cfc2d7",
         "surface-container-lowest": "#0e0c1a",
         "on-tertiary": "#690005",
-        "background": "#131220",
         "on-error": "#690005",
         "surface-variant": "#353342",
         "primary-container": "#9333ea",
@@ -99,35 +96,35 @@ const config = {
       },
     },
     heroui: {
-    defaultTheme: "light",
-    themes: {
-      light: {
-        colors: {
-          foreground: "#111827",
-          background: "#f9fafb",
-          primary: "#4f46e5",
-          secondary: "#10b981",
+      defaultTheme: "light",
+      themes: {
+        light: {
+          colors: {
+            foreground: "#111827",
+            background: "#f9fafb",
+            primary: "#4f46e5",
+            secondary: "#10b981",
+          },
+          layout: {
+            borderRadius: "0.5rem",
+            spacing: "1rem",
+          },
         },
-        layout: {
-          borderRadius: "0.5rem",
-          spacing: "1rem",
-        },
-      },
-      dark: {
-        colors: {
-          foreground: "#f9fafb",
-          background: "#1f2937",
-          primary: "#6366f1",
-          secondary: "#22c55e",
-        },
-        layout: {
-          borderRadius: "0.5rem",
-          spacing: "1rem",
+        dark: {
+          colors: {
+            foreground: "#e5e0f4",
+            background: "#131220",
+            primary: "#ddb8ff",
+            secondary: "#ffb59e",
+          },
+          layout: {
+            borderRadius: "0.5rem",
+            spacing: "1rem",
+          },
         },
       },
     },
   },
-},
   plugins: [heroui(), animate], // ← animate đã hỗ trợ ESM ở v1.0.7+
 };
 

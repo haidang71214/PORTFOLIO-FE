@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useLoginMutation } from "@/store/queries/auth";
 import { LoginRequest } from "@/types";
+import RegisterModal from "../_components/RegisterModal";
+import ForgotPasswordModal from "../_components/ForgotPasswordModal";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,6 +15,30 @@ export default function LoginPage() {
   const [form, setForm] = useState<LoginRequest>({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
+
+  // Modal States
+  const [showRegister, setShowRegister] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+
+  const handleOpenRegister = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setShowRegister(true);
+    setShowForgotPassword(false);
+    window.history.replaceState(null, "", "/auth/login?modal=register");
+  };
+
+  const handleOpenForgot = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setShowForgotPassword(true);
+    setShowRegister(false);
+    window.history.replaceState(null, "", "/auth/login?modal=forgot-password");
+  };
+
+  const handleCloseModals = () => {
+    setShowRegister(false);
+    setShowForgotPassword(false);
+    window.history.replaceState(null, "", "/auth/login");
+  };
 
   // Carousel Refs & States
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -64,6 +90,18 @@ export default function LoginPage() {
     return () => clearInterval(interval);
   }, [activeIndex]);
 
+  // Read URL search params on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("modal") === "register") {
+        setShowRegister(true);
+      } else if (params.get("modal") === "forgot-password") {
+        setShowForgotPassword(true);
+      }
+    }
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
@@ -74,20 +112,29 @@ export default function LoginPage() {
       toast.success("Đăng nhập thành công!");
       router.push("/");
     } catch (err: any) {
-      toast.error(err?.data?.message ?? "Đăng nhập thất bại. Vui lòng thử lại.");
+      let errMsg = "Đăng nhập thất bại. Vui lòng thử lại.";
+      if (err?.data?.message) {
+        errMsg = Array.isArray(err.data.message)
+          ? err.data.message.join(", ")
+          : err.data.message;
+      }
+      toast.error(errMsg);
     }
   };
 
   return (
     <div className="bg-auth-main text-on-surface selection:bg-primary-container selection:text-white min-h-screen overflow-hidden font-body-md">
-      {/* Top Header */}
-      <header className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-gutter py-4 backdrop-blur-md bg-surface/5">
-        <div className="font-display-lg-mobile text-display-lg-mobile font-bold tracking-tighter text-on-surface">
-          Portfolio
-        </div>
-      </header>
+      <main className="flex h-screen w-full relative">
+        {/* Floating Back Button */}
+        <button
+          onClick={() => router.push("/")}
+          className="absolute top-6 left-6 z-30 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-black/40 backdrop-blur-md text-white hover:bg-black/60 transition-all border border-white/10 hover:scale-[1.02] active:scale-[0.98] cursor-pointer animate-fade-in"
+        >
+          <span className="font-label-caps text-[10px] font-bold tracking-widest text-white">
+            QUAY LẠI
+          </span>
+        </button>
 
-      <main className="flex h-screen w-full">
         {/* Left Slider: Vertical snappable carousel */}
         <section className="hidden md:block flex-1 relative overflow-hidden">
           <div 
@@ -203,9 +250,13 @@ export default function LoginPage() {
                   <label className="font-label-caps text-label-caps text-on-surface-variant opacity-70" htmlFor="password">
                     PASSWORD KEY
                   </label>
-                  <Link className="font-label-caps text-[10px] text-primary hover:text-white transition-colors" href="/auth/forgot-password">
+                  <button
+                    type="button"
+                    onClick={handleOpenForgot}
+                    className="font-label-caps text-[10px] text-primary hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer"
+                  >
                     QUÊN MẬT KHẨU?
-                  </Link>
+                  </button>
                 </div>
                 <div className="relative group">
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors select-none">
@@ -293,9 +344,13 @@ export default function LoginPage() {
 
               <p className="text-center font-body-md text-[13px] text-on-surface-variant">
                 Chưa có tài khoản?{" "}
-                <Link className="text-secondary font-semibold hover:underline" href="/auth/register">
+                <button
+                  type="button"
+                  onClick={handleOpenRegister}
+                  className="text-secondary font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer"
+                >
                   Tạo tài khoản mới
-                </Link>
+                </button>
               </p>
             </footer>
           </div>
@@ -319,6 +374,19 @@ export default function LoginPage() {
           </div>
         </aside>
       </main>
+
+      {/* Render Modals with 2D Animations */}
+      {showRegister && (
+        <RegisterModal
+          onClose={handleCloseModals}
+          onSwitchToForgot={handleOpenForgot}
+        />
+      )}
+      {showForgotPassword && (
+        <ForgotPasswordModal
+          onClose={handleCloseModals}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { BASE_URLS } from "@/constants";
+import { BASE_URL, BASE_URLS } from "@/constants";
 import webStorageClient from "@/utils/webStorageClient";
 import {
   BaseQueryFn,
@@ -9,7 +9,7 @@ import {
 // phần này là do tôi lười nên setup ở đây để lôi ra dùng nếu có api nào 
 // mà không cần token thì bỏ qua 
 export const rawBaseQuery = fetchBaseQuery({
-  baseUrl: BASE_URLS,
+  baseUrl: BASE_URL,
   credentials: "include",
   prepareHeaders: (headers, { endpoint }) => {
     const token = webStorageClient.getToken();
@@ -53,33 +53,24 @@ export const baseQueryWithReauth: BaseQueryFn<
   // Xử lý an toàn cho url (args có thể là string hoặc object)
   const url = typeof args === "string" ? args : args.url;
 
-  if (result.error?.status === 401 && !url?.includes("refresh-token")) {
+  if (result.error?.status === 401 && !url?.includes("extend-token")) {
 
 
     if (!isRefreshing) {
       isRefreshing = true;
 
-      const refreshToken = webStorageClient.getRefreshToken();
-
-
-      if (!refreshToken) {
-
-        webStorageClient.logout();
-        return result;
-      }
+      // Server dùng HttpOnly cookie, không cần lấy refreshToken từ storage
+      // Chỉ cần đảm bảo credentials: "include" được gửi (đã set ở rawBaseQuery)
 
 
 
       // Gọi API refresh
       const refreshResult = await rawBaseQuery(
         {
-          url: "Auth/refresh-token",
+          url: "/auth/extend-token",
           method: "POST",
-          body: { refreshToken },
-          // Option này đảm bảo header sẽ không gửi kèm Authorization Bearer cũ lên nếu cần
-          headers: {
-             Authorization: "" 
-          }
+          // credentials: "include" đã được set ở rawBaseQuery — browser tự gửi HttpOnly cookie
+          // Không gửi body — server dùng cookie refreshToken
         },
         api,
         extraOptions
@@ -88,7 +79,8 @@ export const baseQueryWithReauth: BaseQueryFn<
 
 
       if (refreshResult.data) {
-        const newAccessToken = (refreshResult.data as any).data.accessToken;
+        // Response từ /auth/extend-token: { accessToken: string }
+        const newAccessToken = (refreshResult.data as any).accessToken;
         
         // (Tùy chọn) Nếu backend trả cả newRefreshToken thì nhớ lưu lại luôn:
         // const newRefreshToken = (refreshResult.data as any).data.refreshToken;
