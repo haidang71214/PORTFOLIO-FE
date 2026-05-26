@@ -15,7 +15,7 @@ import {
 import { useAuthModal } from "@/context/AuthModalContext";
 import { useI18n } from "@/context/I18nContext";
 import Typewriter from "@/components/Typewriter";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
   const [selectedMajor, setSelectedMajor] = useState<string>("all");
@@ -118,11 +118,11 @@ export default function Home() {
 
       <div className="relative z-10 max-w-[1280px] mx-auto px-6">
 
-        {/* ── HERO ── */}
+        {/* ── HERO (Triggers on load) ── */}
         <section className="pt-28 pb-20 md:pt-36">
           <div className="grid md:grid-cols-[1fr_auto] gap-12 items-end">
             <div>
-              {/* Label with Typewriter effect */}
+              {/* Label */}
               <Typewriter 
                 texts={[t("hero.label")]} 
                 speed={50} 
@@ -131,7 +131,7 @@ export default function Home() {
                 className="text-xs font-mono font-bold tracking-[0.2em] uppercase text-[#630ed4] dark:text-[#c084fc] mb-5" 
               />
 
-              {/* Big heading with Typewriter effect and highlighted sections */}
+              {/* Big heading */}
               <h1 className="text-[42px] md:text-[68px] leading-[1.1] font-black tracking-[-0.04em] text-[#1d1a24] dark:text-white max-w-2xl min-h-[140px] md:min-h-[224px]">
                 <Typewriter 
                   texts={[t("hero.title")]} 
@@ -141,7 +141,7 @@ export default function Home() {
                 />
               </h1>
 
-              {/* Description paragraph with Typewriter effect */}
+              {/* Description */}
               <div className="mt-6 text-[16px] leading-[1.7] text-[#6b6378] dark:text-[#9d90b0] max-w-md min-h-[56px] md:min-h-[82px]">
                 <Typewriter 
                   texts={[t("hero.desc")]} 
@@ -151,8 +151,13 @@ export default function Home() {
                 />
               </div>
 
-              {/* Animated Action Buttons */}
-              <div className="flex items-center gap-4 mt-8">
+              {/* Action Buttons (Slide Up immediately on load) */}
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
+                className="flex items-center gap-4 mt-8"
+              >
                 <motion.div
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
@@ -178,11 +183,16 @@ export default function Home() {
                     {t("hero.btn.custom")} <Mail size={14} />
                   </Link>
                 </motion.div>
-              </div>
+              </motion.div>
             </div>
 
-            {/* Stats block */}
-            <div className="hidden md:grid grid-cols-2 gap-px bg-[#1d1a24]/10 dark:bg-white/10 border border-[#1d1a24]/10 dark:border-white/10 self-end">
+            {/* Stats block (Slide in from right immediately on load) */}
+            <motion.div 
+              initial={{ opacity: 0, x: 60 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
+              className="hidden md:grid grid-cols-2 gap-px bg-[#1d1a24]/10 dark:bg-white/10 border border-[#1d1a24]/10 dark:border-white/10 self-end"
+            >
               {[
                 { n: "500+", l: t("stats.customers") },
                 { n: "20+",  l: t("stats.templates") },
@@ -194,12 +204,18 @@ export default function Home() {
                   <p className="text-xs text-[#6b6378] dark:text-[#9d90b0] mt-0.5 font-medium">{s.l}</p>
                 </div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </section>
 
-        {/* ── CATEGORY FILTERS ── */}
-        <section className="pb-8 border-t border-[#1d1a24]/10 dark:border-white/10">
+        {/* ── CATEGORY FILTERS (Scroll triggered, slides in from Left) ── */}
+        <motion.section 
+          initial={{ opacity: 0, x: -50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: false, amount: 0.2 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="pb-8 border-t border-[#1d1a24]/10 dark:border-white/10"
+        >
           <div className="flex items-center gap-1 pt-6 overflow-x-auto no-scrollbar">
             {categories.map((cat) => {
               const active = selectedMajor === cat.id;
@@ -228,74 +244,83 @@ export default function Home() {
               );
             })}
           </div>
-        </section>
+        </motion.section>
 
-        {/* ── TEMPLATE GRID ── */}
+        {/* ── TEMPLATE GRID (Scroll triggered, cards slide up and fade in with stagger, resets on scroll up) ── */}
         <section className="pb-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTemplates.map((tItem) => (
-              <motion.div 
-                key={tItem.id} 
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3 }}
-                whileHover={{ y: -6 }}
-                className="group border border-[#1d1a24]/10 dark:border-white/8 hover:border-[#630ed4]/40 transition-all duration-300 bg-white/60 dark:bg-white/[0.03] shadow-sm hover:shadow-md"
-              >
-                {/* Image */}
-                <div className="aspect-[4/3] overflow-hidden bg-[#f0eaf8] dark:bg-[#1a1525]">
-                  <img
-                    src={tItem.image}
-                    alt={tItem.title}
-                    className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
-                    loading="lazy"
-                  />
-                </div>
-
-                {/* Info */}
-                <div className="p-5">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      {tItem.tag && (
-                        <span className="inline-block text-[10px] font-bold tracking-widest uppercase text-[#630ed4] dark:text-[#c084fc] mb-1">
-                          {tItem.tag === "Bán chạy" ? t("tpl.bestSeller") : tItem.tag}
-                        </span>
-                      )}
-                      <h3 className="font-bold text-[15px] text-[#1d1a24] dark:text-white leading-tight">
-                        {tItem.title}
-                      </h3>
-                      <p className="text-xs text-[#6b6378] dark:text-[#9d90b0] mt-0.5">
-                        {getMajorLabel(tItem.major, tItem.majorLabel)}
-                      </p>
-                    </div>
-                    <span className="text-[15px] font-black text-[#630ed4] dark:text-[#c084fc] whitespace-nowrap ml-3 shrink-0">
-                      {tItem.price}
-                    </span>
+          <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnimatePresence mode="popLayout">
+              {filteredTemplates.map((tItem, index) => (
+                <motion.div 
+                  key={tItem.id} 
+                  layout
+                  initial={{ opacity: 0, y: 60 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  viewport={{ once: false, amount: 0.1 }}
+                  transition={{ duration: 0.5, delay: (index % 3) * 0.1 }}
+                  whileHover={{ y: -6 }}
+                  className="group border border-[#1d1a24]/10 dark:border-white/8 hover:border-[#630ed4]/40 transition-all duration-300 bg-white/60 dark:bg-white/[0.03] shadow-sm hover:shadow-md"
+                >
+                  {/* Image */}
+                  <div className="aspect-[4/3] overflow-hidden bg-[#f0eaf8] dark:bg-[#1a1525]">
+                    <img
+                      src={tItem.image}
+                      alt={tItem.title}
+                      className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
+                      loading="lazy"
+                    />
                   </div>
-                  
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Link
-                      href={`/templates/${tItem.id}`}
-                      className="block w-full py-2.5 text-center text-xs font-bold tracking-widest uppercase bg-[#1d1a24] dark:bg-white text-white dark:text-[#0b0912] hover:bg-[#630ed4] dark:hover:bg-[#c084fc] dark:hover:text-white transition-colors"
+
+                  {/* Info */}
+                  <div className="p-5">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        {tItem.tag && (
+                          <span className="inline-block text-[10px] font-bold tracking-widest uppercase text-[#630ed4] dark:text-[#c084fc] mb-1">
+                            {tItem.tag === "Bán chạy" ? t("tpl.bestSeller") : tItem.tag}
+                          </span>
+                        )}
+                        <h3 className="font-bold text-[15px] text-[#1d1a24] dark:text-white leading-tight">
+                          {tItem.title}
+                        </h3>
+                        <p className="text-xs text-[#6b6378] dark:text-[#9d90b0] mt-0.5">
+                          {getMajorLabel(tItem.major, tItem.majorLabel)}
+                        </p>
+                      </div>
+                      <span className="text-[15px] font-black text-[#630ed4] dark:text-[#c084fc] whitespace-nowrap ml-3 shrink-0">
+                        {tItem.price}
+                      </span>
+                    </div>
+                    
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                     >
-                      {t("tpl.buy")}
-                    </Link>
-                  </motion.div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                      <Link
+                        href={`/templates/${tItem.id}`}
+                        className="block w-full py-2.5 text-center text-xs font-bold tracking-widest uppercase bg-[#1d1a24] dark:bg-white text-white dark:text-[#0b0912] hover:bg-[#630ed4] dark:hover:bg-[#c084fc] dark:hover:text-white transition-colors"
+                      >
+                        {t("tpl.buy")}
+                      </Link>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         </section>
 
-        {/* ── WHY SECTION ── */}
-        <section className="pb-24 border-t border-[#1d1a24]/10 dark:border-white/10 pt-16">
+        {/* ── WHY SECTION (Scroll triggered, left slides from left, right slides from right) ── */}
+        <section className="pb-24 border-t border-[#1d1a24]/10 dark:border-white/10 pt-16 overflow-hidden">
           <div className="grid md:grid-cols-2 gap-16 items-start">
-            <div>
+            {/* Left side (Slide in from Left) */}
+            <motion.div
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: false, amount: 0.2 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
               <p className="text-xs font-mono font-bold tracking-[0.2em] uppercase text-[#630ed4] dark:text-[#c084fc] mb-4">
                 {t("why.label")}
               </p>
@@ -309,8 +334,9 @@ export default function Home() {
               <p className="text-[15px] leading-relaxed text-[#6b6378] dark:text-[#9d90b0] max-w-sm">
                 {t("why.desc")}
               </p>
-            </div>
+            </motion.div>
 
+            {/* Right side (Slide in items with staggered delay from Right) */}
             <div className="space-y-0 border border-[#1d1a24]/10 dark:border-white/10">
               {[
                 { t: t("why.item1.t"),     d: t("why.item1.d") },
@@ -318,21 +344,34 @@ export default function Home() {
                 { t: t("why.item3.t"),     d: t("why.item3.d") },
                 { t: t("why.item4.t"),     d: t("why.item4.d") },
               ].map((item, i) => (
-                <div key={i} className="flex gap-4 p-5 border-b border-[#1d1a24]/10 dark:border-white/10 last:border-b-0 group hover:bg-[#630ed4]/[0.03] transition-colors">
+                <motion.div 
+                  key={i} 
+                  initial={{ opacity: 0, x: 60 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: false, amount: 0.2 }}
+                  transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
+                  className="flex gap-4 p-5 border-b border-[#1d1a24]/10 dark:border-white/10 last:border-b-0 group hover:bg-[#630ed4]/[0.03] transition-colors"
+                >
                   <CheckCircle2 size={17} className="text-[#630ed4] dark:text-[#c084fc] shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-bold text-[#1d1a24] dark:text-white">{item.t}</p>
                     <p className="text-xs text-[#6b6378] dark:text-[#9d90b0] mt-1">{item.d}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── CTA STRIP ── */}
+        {/* ── CTA STRIP (Scroll triggered, scale and lift up) ── */}
         <section className="pb-20">
-          <div className="relative bg-[#630ed4] overflow-hidden p-10 md:p-16 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.92, y: 40 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.25 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="relative bg-[#630ed4] overflow-hidden p-10 md:p-16 flex flex-col md:flex-row items-start md:items-center justify-between gap-8"
+          >
             {/* dot grid */}
             <div
               className="absolute inset-0 opacity-[0.08]"
@@ -372,27 +411,39 @@ export default function Home() {
                 </button>
               </motion.div>
             </div>
-          </div>
+          </motion.div>
         </section>
       </div>
 
-      {/* ── FOOTER ── */}
+      {/* ── FOOTER (Scroll triggered, columns stagger slide up) ── */}
       <footer className="border-t border-[#1d1a24]/10 dark:border-white/10 bg-[#fef7ff] dark:bg-[#0b0912]">
         <div className="max-w-[1280px] mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
-          <div className="col-span-2 md:col-span-1">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.1 }}
+            transition={{ duration: 0.5 }}
+            className="col-span-2 md:col-span-1"
+          >
             <p className="font-black text-[#630ed4] dark:text-[#c084fc] tracking-tight mb-3">
               {t("footer.brand")}
             </p>
             <p className="text-xs text-[#6b6378] dark:text-[#9d90b0] leading-relaxed whitespace-pre-line">
               {t("footer.copyright")}
             </p>
-          </div>
+          </motion.div>
           {[
             { title: t("footer.products"), links: [[t("footer.products") === "Products" || t("footer.products") === "Sản phẩm" ? "Marketplace" : "Marketplace", "/templates"], [t("footer.products") === "Products" ? "Design Service" : "Dịch vụ thiết kế", "/contact"], [t("footer.products") === "Products" ? "Free" : "Miễn phí", "/free"]] },
             { title: t("footer.company"),  links: [["Privacy", "/privacy"], ["Terms", "/terms"], ["Careers", "/careers"]] },
             { title: t("footer.support"),  links: [["Support", "/support"], ["Affiliate", "/affiliate"], ["FAQ", "/faq"]] },
-          ].map((col) => (
-            <div key={col.title}>
+          ].map((col, idx) => (
+            <motion.div 
+              key={col.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.1 }}
+              transition={{ duration: 0.5, delay: (idx + 1) * 0.1 }}
+            >
               <p className="text-xs font-bold uppercase tracking-widest text-[#1d1a24] dark:text-white mb-3">{col.title}</p>
               <nav className="flex flex-col gap-2">
                 {col.links.map(([label, href]) => (
@@ -401,7 +452,7 @@ export default function Home() {
                   </Link>
                 ))}
               </nav>
-            </div>
+            </motion.div>
           ))}
         </div>
       </footer>
