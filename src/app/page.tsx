@@ -103,10 +103,48 @@ export default function Home() {
     ? templates
     : templates.filter((t) => t.major === selectedMajor);
 
-  return (
-    <div className="min-h-screen bg-[#fef7ff] dark:bg-[#0b0912] text-[#1d1a24] dark:text-[#e8e0f0] font-sans transition-colors duration-300 overflow-x-hidden">
+  // Floating 2D shapes configuration - Mega Quantity (25 items) to populate the whole scroll length
+  const floatingShapes = [
+    // Top / Hero Region (0% - 30% height)
+    { text: "✦", size: "text-7xl md:text-8xl", color: "text-[#630ed4]/15 dark:text-[#c084fc]/15", top: "8%", left: "4%", rotateSpeed: 10 },
+    { text: "▲", size: "text-6xl md:text-7xl", color: "text-[#a200ba]/12 dark:text-[#f5d0ff]/10", top: "14%", left: "85%", rotateSpeed: -12 },
+    { text: "✚", size: "text-5xl md:text-6xl", color: "text-amber-500/15 dark:text-amber-400/15", top: "25%", left: "40%", rotateSpeed: 8 },
+    { text: "◆", size: "text-8xl", color: "text-fuchsia-500/10 dark:text-fuchsia-400/10", top: "18%", left: "18%", rotateSpeed: -16 },
+    { text: "⚙", size: "text-6xl", color: "text-zinc-400/12 dark:text-[#c084fc]/10", top: "5%", left: "75%", rotateSpeed: 14 },
+    { text: "★", size: "text-5xl", color: "text-amber-500/10 dark:text-amber-400/8", top: "28%", left: "68%", rotateSpeed: 11 },
 
-      {/* Subtle Parallax Blobs */}
+    // Upper Middle / Filters Region (30% - 50% height)
+    { text: "</>", size: "text-7xl font-mono", color: "text-[#630ed4]/12 dark:text-[#c084fc]/10", top: "38%", left: "6%", rotateSpeed: 9 },
+    { text: "⚙", size: "text-8xl", color: "text-zinc-400/15 dark:text-zinc-600/12", top: "45%", left: "90%", rotateSpeed: 13 },
+    { text: "●", size: "text-6xl", color: "text-[#a200ba]/10 dark:text-[#f5d0ff]/8", top: "35%", left: "25%", rotateSpeed: 19 },
+    { text: "✦", size: "text-6xl", color: "text-fuchsia-500/12 dark:text-[#c084fc]/12", top: "48%", left: "75%", rotateSpeed: -14 },
+    { text: "▲", size: "text-5xl", color: "text-amber-500/12 dark:text-amber-400/10", top: "42%", left: "50%", rotateSpeed: -9 },
+
+    // Middle / Products Grid Region (50% - 75% height)
+    { text: "✚", size: "text-7xl md:text-8xl", color: "text-[#630ed4]/12 dark:text-[#c084fc]/10", top: "55%", left: "12%", rotateSpeed: 11 },
+    { text: "◆", size: "text-8xl", color: "text-zinc-500/10 dark:text-zinc-400/10", top: "62%", left: "82%", rotateSpeed: -17 },
+    { text: "✖", size: "text-6xl", color: "text-[#a200ba]/12 dark:text-[#f5d0ff]/10", top: "58%", left: "45%", rotateSpeed: 10 },
+    { text: "★", size: "text-7xl", color: "text-amber-500/15 dark:text-amber-400/12", top: "68%", left: "68%", rotateSpeed: 9 },
+    { text: "⚙", size: "text-5xl", color: "text-zinc-400/10 dark:text-[#c084fc]/8", top: "52%", left: "32%", rotateSpeed: 15 },
+    { text: "</>", size: "text-6xl font-mono", color: "text-fuchsia-500/10 dark:text-fuchsia-400/10", top: "66%", left: "22%", rotateSpeed: -10 },
+
+    // Lower Middle / Why Section Region (75% - 88% height)
+    { text: "✦", size: "text-8xl", color: "text-amber-500/15 dark:text-[#c084fc]/12", top: "75%", left: "88%", rotateSpeed: -7 },
+    { text: "▲", size: "text-7xl", color: "text-[#a200ba]/12 dark:text-[#f5d0ff]/10", top: "78%", left: "8%", rotateSpeed: -15 },
+    { text: "✚", size: "text-6xl md:text-7xl", color: "text-zinc-400/12 dark:text-zinc-600/12", top: "82%", left: "55%", rotateSpeed: 13 },
+    { text: "■", size: "text-5xl", color: "text-[#630ed4]/10 dark:text-amber-400/8", top: "73%", left: "35%", rotateSpeed: 21 },
+
+    // Bottom / CTA & Footer Region (88% - 98% height)
+    { text: "✖", size: "text-7xl md:text-8xl", color: "text-zinc-500/15 dark:text-zinc-400/12", top: "88%", left: "82%", rotateSpeed: 8 },
+    { text: "✦", size: "text-8xl", color: "text-[#630ed4]/15 dark:text-[#c084fc]/15", top: "92%", left: "15%", rotateSpeed: 12 },
+    { text: "✚", size: "text-6xl md:text-7xl", color: "text-[#a200ba]/12 dark:text-amber-400/10", top: "96%", left: "62%", rotateSpeed: -13 },
+    { text: "◆", size: "text-5xl", color: "text-fuchsia-500/10 dark:text-fuchsia-400/10", top: "90%", left: "48%", rotateSpeed: 16 },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#fef7ff] dark:bg-[#0b0912] text-[#1d1a24] dark:text-[#e8e0f0] font-sans transition-colors duration-300 overflow-x-hidden relative">
+
+      {/* Subtle Parallax Blobs (Still reacts slightly to mouse for deep dynamic feel) */}
       <div
         className="fixed z-0 w-[600px] h-[600px] rounded-full pointer-events-none opacity-[0.08] bg-[#7c3aed] -top-32 -right-32 blur-[140px]"
         style={{ transform: `translate(${mousePos.x}px, ${mousePos.y}px)` }}
@@ -116,9 +154,62 @@ export default function Home() {
         style={{ transform: `translate(${-mousePos.x}px, ${-mousePos.y}px)` }}
       />
 
+      {/* Brutalist Dot Grid Background (Static, no mouse tracking) */}
+      <div 
+        className="fixed inset-0 z-0 opacity-[0.03] dark:opacity-[0.02] text-[#1d1a24] dark:text-white pointer-events-none"
+        style={{
+          backgroundImage: "radial-gradient(circle, currentColor 1.5px, transparent 1.5px)",
+          backgroundSize: "32px 32px",
+        }}
+      />
+
+      {/* Floating 2D Shapes (Continuous rising/floating upward effect, no mouse tracking) */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        {floatingShapes.map((shape, idx) => (
+          <motion.div
+            key={idx}
+            className={`absolute ${shape.size} ${shape.color} font-bold select-none`}
+            style={{
+              top: shape.top,
+              left: shape.left,
+            }}
+            animate={{
+              y: [220, -220],
+              opacity: [0, 1, 1, 0],
+            }}
+            transition={{
+              y: {
+                duration: 8 + (idx % 6) * 3, // speeds between 8s and 23s
+                repeat: Infinity,
+                ease: "linear",
+              },
+              opacity: {
+                duration: 8 + (idx % 6) * 3,
+                repeat: Infinity,
+                ease: "linear",
+                times: [0, 0.2, 0.8, 1], // quick fade in (first 20%), stays visible (20%-80%), fade out (last 20%)
+              }
+            }}
+          >
+            <motion.div
+              animate={{
+                rotate: [0, 360],
+              }}
+              transition={{
+                duration: Math.abs(shape.rotateSpeed),
+                repeat: Infinity,
+                ease: "linear",
+              }}
+            >
+              {shape.text}
+            </motion.div>
+          </motion.div>
+        ))}
+      </div>
+
       <div className="relative z-10 max-w-[1280px] mx-auto px-6">
 
-        {/* ── HERO (Triggers on load) ── */}
+        {/* ── HERO ── */}
         <section className="pt-28 pb-20 md:pt-36">
           <div className="grid md:grid-cols-[1fr_auto] gap-12 items-end">
             <div>
@@ -151,7 +242,7 @@ export default function Home() {
                 />
               </div>
 
-              {/* Action Buttons (Slide Up immediately on load) */}
+              {/* Action Buttons */}
               <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -186,12 +277,19 @@ export default function Home() {
               </motion.div>
             </div>
 
-            {/* Stats block (Slide in from right immediately on load) */}
+            {/* Stats block (with elegant 3D tilt hover effect) */}
             <motion.div 
               initial={{ opacity: 0, x: 60 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-              className="hidden md:grid grid-cols-2 gap-px bg-[#1d1a24]/10 dark:bg-white/10 border border-[#1d1a24]/10 dark:border-white/10 self-end"
+              whileHover={{ 
+                rotateY: 8, 
+                rotateX: -8,
+                scale: 1.03,
+                boxShadow: "0px 15px 35px rgba(99, 14, 212, 0.12)"
+              }}
+              style={{ transformStyle: "preserve-3d", perspective: 1000 }}
+              className="hidden md:grid grid-cols-2 gap-px bg-[#1d1a24]/10 dark:bg-white/10 border border-[#1d1a24]/10 dark:border-white/10 self-end transition-all duration-300"
             >
               {[
                 { n: "500+", l: t("stats.customers") },
@@ -199,7 +297,7 @@ export default function Home() {
                 { n: "4.9",  l: t("stats.rating") },
                 { n: "24/7", l: t("stats.support") },
               ].map((s) => (
-                <div key={s.l} className="bg-[#fef7ff] dark:bg-[#0b0912] p-6 min-w-[120px]">
+                <div key={s.l} className="bg-[#fef7ff] dark:bg-[#0b0912] p-6 min-w-[120px] transition-colors">
                   <p className="text-2xl font-black text-[#630ed4] dark:text-[#c084fc]">{s.n}</p>
                   <p className="text-xs text-[#6b6378] dark:text-[#9d90b0] mt-0.5 font-medium">{s.l}</p>
                 </div>
@@ -208,7 +306,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── CATEGORY FILTERS (Scroll triggered, slides in from Left) ── */}
+        {/* ── CATEGORY FILTERS ── */}
         <motion.section 
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -246,7 +344,7 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* ── TEMPLATE GRID (Scroll triggered, cards slide up and fade in with stagger, resets on scroll up) ── */}
+        {/* ── TEMPLATE GRID ── */}
         <section className="pb-20">
           <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence mode="popLayout">
@@ -311,10 +409,10 @@ export default function Home() {
           </motion.div>
         </section>
 
-        {/* ── WHY SECTION (Scroll triggered, left slides from left, right slides from right) ── */}
+        {/* ── WHY SECTION ── */}
         <section className="pb-24 border-t border-[#1d1a24]/10 dark:border-white/10 pt-16 overflow-hidden">
           <div className="grid md:grid-cols-2 gap-16 items-start">
-            {/* Left side (Slide in from Left) */}
+            {/* Left side */}
             <motion.div
               initial={{ opacity: 0, x: -60 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -336,7 +434,7 @@ export default function Home() {
               </p>
             </motion.div>
 
-            {/* Right side (Slide in items with staggered delay from Right) */}
+            {/* Right side */}
             <div className="space-y-0 border border-[#1d1a24]/10 dark:border-white/10">
               {[
                 { t: t("why.item1.t"),     d: t("why.item1.d") },
@@ -363,7 +461,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── CTA STRIP (Scroll triggered, scale and lift up) ── */}
+        {/* ── CTA STRIP ── */}
         <section className="pb-20">
           <motion.div 
             initial={{ opacity: 0, scale: 0.92, y: 40 }}
@@ -415,7 +513,7 @@ export default function Home() {
         </section>
       </div>
 
-      {/* ── FOOTER (Scroll triggered, columns stagger slide up) ── */}
+      {/* ── FOOTER ── */}
       <footer className="border-t border-[#1d1a24]/10 dark:border-white/10 bg-[#fef7ff] dark:bg-[#0b0912]">
         <div className="max-w-[1280px] mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
           <motion.div 
