@@ -19,11 +19,13 @@ const translations = {
     "nav.register": "Đăng ký",
     "nav.logout": "Đăng xuất",
     "nav.profile": "Hồ sơ cá nhân",
+    "nav.editProfile": "Chỉnh sửa thông tin cá nhân",
+    "nav.manageProfile": "Quản lí profile",
     "nav.orders": "Bản mẫu đã mua",
     "nav.role": "Đăng nhập với tư cách",
     
     "hero.label": "— Portfolio Templates Shop",
-    "hero.title": "Giao diện\n*không giống như*\nbản mẫu thông thường.",
+    "hero.title": "Giao diện\n Không giống như \n Lồn",
     "hero.desc": "Bộ sưu tập portfolio chuẩn UI/UX, tối ưu code và SEO, được thiết kế thủ công cho từng ngành nghề cụ thể.",
     "hero.btn.all": "Xem tất cả",
     "hero.btn.custom": "Thiết kế riêng",
@@ -76,6 +78,8 @@ const translations = {
     "nav.register": "Register",
     "nav.logout": "Logout",
     "nav.profile": "Profile",
+    "nav.editProfile": "Edit Personal Info",
+    "nav.manageProfile": "Manage Profile",
     "nav.orders": "Purchased Templates",
     "nav.role": "Logged in as",
     

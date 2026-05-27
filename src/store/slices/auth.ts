@@ -73,6 +73,27 @@ export const authSlice = createSlice({
         }
       },
     );
+
+    // ─── Get Me ───────────────────────────────────────────
+    // GET /auth/me → AuthUser (flat). Tự set cờ auth + user khi token còn hợp lệ.
+    builder.addMatcher(
+      authApi.endpoints.getMe.matchFulfilled,
+      (state, action) => {
+        state.user = action.payload;
+        state.isAuthenticatedAccount = true;
+        webStorageClient.setUser(action.payload);
+      },
+    );
+
+    // Nếu /auth/me trả về lỗi (token hết hạn / không hợp lệ) → clear state
+    builder.addMatcher(
+      authApi.endpoints.getMe.matchRejected,
+      (state) => {
+        state.user = undefined;
+        state.isAuthenticatedAccount = false;
+        webStorageClient.logout();
+      },
+    );
   },
 });
 

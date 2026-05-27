@@ -110,12 +110,12 @@ export default function Home() {
     { text: "▲", size: "text-6xl md:text-7xl", color: "text-[#a200ba]/12 dark:text-[#f5d0ff]/10", top: "14%", left: "85%", rotateSpeed: -12 },
     { text: "✚", size: "text-5xl md:text-6xl", color: "text-amber-500/15 dark:text-amber-400/15", top: "25%", left: "40%", rotateSpeed: 8 },
     { text: "◆", size: "text-8xl", color: "text-fuchsia-500/10 dark:text-fuchsia-400/10", top: "18%", left: "18%", rotateSpeed: -16 },
-    { text: "⚙", size: "text-6xl", color: "text-zinc-400/12 dark:text-[#c084fc]/10", top: "5%", left: "75%", rotateSpeed: 14 },
+    { text: "⚙️", size: "text-6xl", color: "text-zinc-400/12 dark:text-[#c084fc]/10", top: "5%", left: "75%", rotateSpeed: 14 },
     { text: "★", size: "text-5xl", color: "text-amber-500/10 dark:text-amber-400/8", top: "28%", left: "68%", rotateSpeed: 11 },
 
     // Upper Middle / Filters Region (30% - 50% height)
     { text: "</>", size: "text-7xl font-mono", color: "text-[#630ed4]/12 dark:text-[#c084fc]/10", top: "38%", left: "6%", rotateSpeed: 9 },
-    { text: "⚙", size: "text-8xl", color: "text-zinc-400/15 dark:text-zinc-600/12", top: "45%", left: "90%", rotateSpeed: 13 },
+    { text: "⚙️", size: "text-8xl", color: "text-zinc-400/15 dark:text-zinc-600/12", top: "45%", left: "90%", rotateSpeed: 13 },
     { text: "●", size: "text-6xl", color: "text-[#a200ba]/10 dark:text-[#f5d0ff]/8", top: "35%", left: "25%", rotateSpeed: 19 },
     { text: "✦", size: "text-6xl", color: "text-fuchsia-500/12 dark:text-[#c084fc]/12", top: "48%", left: "75%", rotateSpeed: -14 },
     { text: "▲", size: "text-5xl", color: "text-amber-500/12 dark:text-amber-400/10", top: "42%", left: "50%", rotateSpeed: -9 },
@@ -125,7 +125,7 @@ export default function Home() {
     { text: "◆", size: "text-8xl", color: "text-zinc-500/10 dark:text-zinc-400/10", top: "62%", left: "82%", rotateSpeed: -17 },
     { text: "✖", size: "text-6xl", color: "text-[#a200ba]/12 dark:text-[#f5d0ff]/10", top: "58%", left: "45%", rotateSpeed: 10 },
     { text: "★", size: "text-7xl", color: "text-amber-500/15 dark:text-amber-400/12", top: "68%", left: "68%", rotateSpeed: 9 },
-    { text: "⚙", size: "text-5xl", color: "text-zinc-400/10 dark:text-[#c084fc]/8", top: "52%", left: "32%", rotateSpeed: 15 },
+    { text: "⚙️", size: "text-5xl", color: "text-zinc-400/10 dark:text-[#c084fc]/8", top: "52%", left: "32%", rotateSpeed: 15 },
     { text: "</>", size: "text-6xl font-mono", color: "text-fuchsia-500/10 dark:text-fuchsia-400/10", top: "66%", left: "22%", rotateSpeed: -10 },
 
     // Lower Middle / Why Section Region (75% - 88% height)
@@ -278,31 +278,7 @@ export default function Home() {
             </div>
 
             {/* Stats block (with elegant 3D tilt hover effect) */}
-            <motion.div 
-              initial={{ opacity: 0, x: 60 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-              whileHover={{ 
-                rotateY: 8, 
-                rotateX: -8,
-                scale: 1.03,
-                boxShadow: "0px 15px 35px rgba(99, 14, 212, 0.12)"
-              }}
-              style={{ transformStyle: "preserve-3d", perspective: 1000 }}
-              className="hidden md:grid grid-cols-2 gap-px bg-[#1d1a24]/10 dark:bg-white/10 border border-[#1d1a24]/10 dark:border-white/10 self-end transition-all duration-300"
-            >
-              {[
-                { n: "500+", l: t("stats.customers") },
-                { n: "20+",  l: t("stats.templates") },
-                { n: "4.9",  l: t("stats.rating") },
-                { n: "24/7", l: t("stats.support") },
-              ].map((s) => (
-                <div key={s.l} className="bg-[#fef7ff] dark:bg-[#0b0912] p-6 min-w-[120px] transition-colors">
-                  <p className="text-2xl font-black text-[#630ed4] dark:text-[#c084fc]">{s.n}</p>
-                  <p className="text-xs text-[#6b6378] dark:text-[#9d90b0] mt-0.5 font-medium">{s.l}</p>
-                </div>
-              ))}
-            </motion.div>
+           
           </div>
         </section>
 

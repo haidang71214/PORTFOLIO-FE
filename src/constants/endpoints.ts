@@ -12,4 +12,5 @@ export const authEndpoint = {
   CONFIRM_EMAIL: "/auth/confirm-email",
   CONFIRM_PASSWORD_CHANGE: "/auth/confirm-password-change",
   CHANGE_PASSWORD: "/auth/change-password",
+  GET_ME: "/auth/me",
 } as const;

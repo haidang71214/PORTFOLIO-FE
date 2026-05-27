@@ -3,6 +3,7 @@ import {
   ExtendTokenResponse,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
+  GetMeResponse,
   LoginRequest,
   LoginResponse,
   LogoutResponse,
@@ -96,6 +97,17 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
       }),
     }),
+
+    // ─── GET /auth/me ──────────────────────────────────────
+    // Header: Authorization: Bearer <token>
+    // Response: AuthUser (flat object)
+    getMe: builder.query<GetMeResponse, void>({
+      query: () => ({
+        url: authEndpoint.GET_ME,
+        method: "GET",
+      }),
+      providesTags: ["User"],
+    }),
   }),
 });
 
@@ -106,4 +118,5 @@ export const {
   useResetPasswordMutation,
   useLogoutMutation,
   useExtendTokenMutation,
+  useGetMeQuery,
 } = authApi;

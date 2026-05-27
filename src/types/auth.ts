@@ -92,6 +92,10 @@ export interface ExtendTokenResponse {
   accessToken: string;
 }
 
+// ---------- GET ME ----------
+// Response: GET /auth/me => AuthUser trực tiếp (flat object)
+export type GetMeResponse = AuthUser;
+
 // ── Legacy aliases (giữ để tương thích với code cũ chưa refactor) ──
 /** @deprecated Dùng LoginRequest thay thế */
 export type { LoginRequest as LoginDto };

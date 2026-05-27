@@ -18,11 +18,14 @@ import {
   Avatar,
 } from "@heroui/react";
 import { usePathname } from "next/navigation";
+import NextLink from "next/link";
 import { useAppSelector, useAppDispatch } from "@/utils/redux";
 import { clearLoginToken } from "@/store/slices/auth";
+import { useGetMeQuery } from "@/store/queries/auth";
+import webStorageClient from "@/utils/webStorageClient";
 import ThemeToggle from "@/Provider/ThemeToggle";
 import LanguageToggle from "@/components/LanguageToggle";
-import { Sparkles, LogOut, User, ShoppingBag, Mail, Home } from "lucide-react";
+import { Sparkles, LogOut, User, ShoppingBag, Mail, Home, Shield, UserCog, Settings } from "lucide-react";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { useI18n } from "@/context/I18nContext";
 import { motion } from "framer-motion";
@@ -32,12 +35,19 @@ export default function Navbar() {
   const dispatch = useAppDispatch();
   const { isAuthenticatedAccount, user } = useAppSelector((state) => state.auth);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { openLogin, openRegister } = useAuthModal();
   const { t } = useI18n();
 
-  // Close mobile menu on path change
+  // Gọi /auth/me khi mount để tự động set cờ auth + user vào Redux.
+  // Skip nếu chưa có access token (tránh gọi thừa khi chưa login).
+  const hasToken = !!webStorageClient.getToken();
+  useGetMeQuery(undefined, { skip: !hasToken });
+
+  // Close mobile menu and dropdown on path change
   useEffect(() => {
     setIsMenuOpen(false);
+    setIsDropdownOpen(false);
   }, [pathname]);
 
   const handleLogout = () => {
@@ -90,7 +100,7 @@ export default function Navbar() {
                 <Sparkles size={20} className="stroke-[2.5]" />
               </div>
               <p className="font-bold text-lg md:text-xl tracking-tight bg-gradient-to-r from-violet-600 via-fuchsia-500 to-amber-500 dark:from-violet-400 dark:via-fuchsia-400 dark:to-amber-400 bg-clip-text text-transparent">
-                Nâng Tầm Thương Hiệu
+               Đen Đen Project
               </p>
             </Link>
           </motion.div>
@@ -177,7 +187,7 @@ export default function Navbar() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, delay: 0.4, ease: "easeOut" }}
             >
-              <Dropdown placement="bottom-end" className="bg-background/95 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-800/50">
+              <Dropdown isOpen={isDropdownOpen} onOpenChange={setIsDropdownOpen} placement="bottom-end" className="bg-background/95 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-800/50">
                 <DropdownTrigger>
                   <Avatar
                     isBordered
@@ -189,16 +199,46 @@ export default function Navbar() {
                     src={user.images_url || undefined}
                   />
                 </DropdownTrigger>
-                <DropdownMenu aria-label="Profile Actions" variant="flat">
-                  <DropdownItem key="profile" className="h-14 gap-2 opacity-100 cursor-default">
+                <DropdownMenu
+                  aria-label="Profile Actions"
+                  variant="flat"
+                  disabledKeys={["profile"]}
+                >
+                  <DropdownItem key="profile" className="h-auto py-3 gap-2 opacity-100 cursor-default">
                     <p className="font-semibold text-xs text-zinc-500 dark:text-zinc-400">{t("nav.role")}</p>
                     <p className="font-bold text-zinc-800 dark:text-zinc-200">{user.username}</p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{user.email}</p>
+                    <div className="mt-1.5">
+                      {user.role === "admin" ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
+                          <Shield size={10} /> Quản trị viên
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 px-2 py-0.5 rounded-full">
+                          <User size={10} /> Người dùng
+                        </span>
+                      )}
+                    </div>
                   </DropdownItem>
-                  <DropdownItem key="settings" href="/profile" startContent={<User size={16} />}>
+                  <DropdownItem
+                    key="admin"
+                    as={NextLink}
+                    href={user.role === "admin" ? "/admin" : ""}
+                    startContent={<Shield size={16} className={user.role === "admin" ? "text-amber-500" : "text-transparent"} />}
+                    className={user.role === "admin" ? "text-amber-600 dark:text-amber-400 font-semibold" : "hidden"}
+                  >
+                    Quản lí
+                  </DropdownItem>
+                  <DropdownItem key="settings" as={NextLink} href="/profile" startContent={<User size={16} />}>
                     {t("nav.profile")}
                   </DropdownItem>
-                  <DropdownItem key="orders" href="/my-orders" startContent={<ShoppingBag size={16} />}>
+                  <DropdownItem key="edit-profile" as={NextLink} href="/profile/edit" startContent={<UserCog size={16} />}>
+                    {t("nav.editProfile")}
+                  </DropdownItem>
+                  <DropdownItem key="manage-profile" as={NextLink} href="/profile/manage" startContent={<Settings size={16} />}>
+                    {t("nav.manageProfile")}
+                  </DropdownItem>
+                  <DropdownItem key="orders" as={NextLink} href="/my-orders" startContent={<ShoppingBag size={16} />}>
                     {t("nav.orders")}
                   </DropdownItem>
                   <DropdownItem
