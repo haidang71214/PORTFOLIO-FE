@@ -6,6 +6,7 @@ import { Providers } from "./providers";
 import { siteConfig } from "../config/site";
 import { fontSans, fontMono } from "../config/fonts";
 import Navbar from "@/components/Navbar";
+import CustomCursor from "@/components/CustomCursor";
 
 export const metadata: Metadata = {
   title: {
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
         )}
       >
         <Providers>
+          <CustomCursor />
           <div className="relative flex flex-col min-h-screen">
             <Navbar />
             <main className="w-full flex-grow pt-16">

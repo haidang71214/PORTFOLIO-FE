@@ -16,6 +16,9 @@ import { useAuthModal } from "@/context/AuthModalContext";
 import { useI18n } from "@/context/I18nContext";
 import Typewriter from "@/components/Typewriter";
 import { motion, AnimatePresence } from "framer-motion";
+import { useGetAllTemplatesQuery, useGetOwnedTemplatesQuery } from "@/store/queries/templates";
+import { useAppSelector } from "@/utils/redux";
+import { CountdownTimer } from "@/components/common/CountdownTimer";
 
 export default function Home() {
   const [selectedMajor, setSelectedMajor] = useState<string>("all");
@@ -23,6 +26,10 @@ export default function Home() {
   const { openLogin } = useAuthModal();
   const { t } = useI18n();
 
+  const { user } = useAppSelector((s) => s.auth);
+  const { data: dbTemplates } = useGetAllTemplatesQuery();
+  const { data: ownedTemplates } = useGetOwnedTemplatesQuery(undefined, { skip: !user?.id });
+  console.log("dbTemplates",dbTemplates);
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       const moveX = (e.clientX - window.innerWidth / 2) * 0.04;
@@ -41,57 +48,41 @@ export default function Home() {
     { id: "economics",  label: t("cat.economics"),   icon: TrendingUp },
   ];
 
-  const templates = [
-    {
-      id: "tpl-1",
-      title: "Modern Dev Portfolio",
-      major: "it",
-      majorLabel: "IT / Dev",
-      price: "350.000 ₫",
-      tag: "Bán chạy",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDZ1L4F4q20T7iGxEG0ultDyI8C2-o3wGpyFSGSRxXK8waDzNwQDAfWZB3WW32uKP_vb8uv3bTltt2NYDBhodaCJhJ4-PanK6pILTPf036tWu4Ua2wp35DqX4ROWj-HeMcM7RPR0OFBD56iG6AfG5vB9tsNgf4EMZnXFpORgCE64fOs9DuZuh_CkU2b7N80gyzdSa3ROjqazrNh84ajs7cIaMUTmfC67Uv95hMZnjHuMFyJ3uRsHHJ3kptS8JVNUpvA2pp9uFVa3C4",
-    },
-    {
-      id: "tpl-2",
-      title: "Creative Designer Pro",
-      major: "designer",
-      majorLabel: "Design",
-      price: "450.000 ₫",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCqiCWvOxyLM-w4JOFrNVUFiO79evn1Is0NjPY8c8inA6_Nn5_MMFIWtxH_jfUjJkZ3ImfQW-SOOd5Boh2HZ3LPXh7OhirxO7LrzcsGX-svpsC6pJ2N6WSngxuYNv-0ac5KLDGL50FSXnWY1rkFvUYHZ5REh2XeE2SIQNT-kvbkm_oBI71SjLqBO4Jo2bzqNDxK2N2SWpo2RrE5h2_JFDHDSHIQ6nwCfeoz5kopFSF9X3tJ4zNcoutBQnaTHfvOIMwxJylEZOIJEks",
-    },
-    {
-      id: "tpl-3",
-      title: "Editorial Master",
-      major: "journalist",
-      majorLabel: "Journalist",
-      price: "300.000 ₫",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCl8eA2H8dyxxXpR-YQ85XyuFj2ee6-VNh2DxuzN6TUauNfXojvKr_xonX415aQuICRxHsbwvRknaq4aldCuxW-5xGFz7ZwNN31_R9GLNSJ5_EJ3wai2V-sgj9SXlWEc3D4G-8g8pfnsWmYWNOWN4sSrW3NttU-gKbWoq-o0bIqiWNJhqUIKtO4hlC4bmFO81ngmfrFwVdRWRuS5fIj4rEv60TBTEhTSKxZ_fFBKWa8OpdDymKlsO4vK3GyJiM7WtJXHFFKWSXDkqM",
-    },
-    {
-      id: "tpl-4",
-      title: "Data Analyst Hub",
-      major: "economics",
-      majorLabel: "Economics",
-      price: "500.000 ₫",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDvVs_Gjn4n-DYtH0YEGqpstHfAYTuB7epyfNzwZ4llwAJDj6LynZZl6DABFz6pfQClsO_WB5YjrPEUNhHwZovOq1t6EPBWaxAkPpA8u7Es3hfritqgT15AkroAo-uYNBfvR5kYsXraEnu_r0YmkXgikbUr1gd046Oe8KGDX1wqNdQisxFqmaD04bkMhkR7oMMaGDUlvU3CZMSEJctkex98bY5Xk0pzX1G7DdgLA7odDPCRTAg1bRWancsi8HANU3__NnOk7cbnk4k",
-    },
-    {
-      id: "tpl-5",
-      title: "Minimalist Essential",
-      major: "other",
-      majorLabel: "All-purpose",
-      price: "250.000 ₫",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAsjRCub9pCVh0k6VCAYd9lIeoE9LDdNB1ierz6Ho0ke-JPWjb0Gfv2BycS1jwv6RKj9LlpaKoHhCdjiKmECK46zO0Br_7G8YgWYlwVjcDIdm4bg9hJDKeEO5xQmfVkWDRMtpCfXut-sFkTCivfgUupRtOpMKS65xC-XMzT_O7nPIZmoLI_dMb5e9GbsXJIw3gUyTLOr4pD0ZW8Dfrds1enXj65YV6Gf5-BS1Jn5sMCNF6GHMmpkowH5vnurD0wbeTExEmUj0HfBBw",
-    },
-    {
-      id: "tpl-6",
-      title: "Agency Showcase",
-      major: "other",
-      majorLabel: "Agency",
-      price: "650.000 ₫",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCCkLv00_bYIzslm_Ufcptzw20OfvQDnj43b9KbIT-cFwX_DSxX1L5CzPF99AOOVWVB1AqA5lY0nW0RozNNDfUrFOIJoFsZGneQRhoW7m5upPcWpbDyPm8FJ-IRVDC9qiDmR8KGY31pF02v419e5RfdPGltnTGVoMbgIqQYkFbnNh6b_7kaXNbMqRvISc7TJs7KmUWFK-T40IAZkgZa-MLmJN0EowkFZCllOY7sYXN6Q2IwJh1itwt6abD9Vp9eQNWPB4FBVm4503g",
-    },
-  ];
+  const templates = dbTemplates ? dbTemplates.map((tpl: any, index: number) => {
+    const major = tpl.target_major || tpl.targetMajor || tpl.major || "other";
+    const priceNum = Number(tpl.price) || 0;
+    const priceStr = priceNum ? `${priceNum.toLocaleString("vi-VN")} ₫` : "Miễn phí";
+    
+    // Preview image
+    let previewImg = "";
+    if (tpl.previewImageUrls && tpl.previewImageUrls.length > 0) {
+      previewImg = tpl.previewImageUrls[0];
+    } else if (Array.isArray(tpl.preview_images) && tpl.preview_images.length > 0) {
+      previewImg = tpl.preview_images[0];
+    } else if (tpl.preview_url) {
+      previewImg = tpl.preview_url;
+    } else {
+      // Fallback to one of the mock images based on index
+      const mockImages = [
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuDZ1L4F4q20T7iGxEG0ultDyI8C2-o3wGpyFSGSRxXK8waDzNwQDAfWZB3WW32uKP_vb8uv3bTltt2NYDBhodaCJhJ4-PanK6pILTPf036tWu4Ua2wp35DqX4ROWj-HeMcM7RPR0OFBD56iG6AfG5vB9tsNgf4EMZnXFpORgCE64fOs9DuZuh_CkU2b7N80gyzdSa3ROjqazrNh84ajs7cIaMUTmfC67Uv95hMZnjHuMFyJ3uRsHHJ3kptS8JVNUpvA2pp9uFVa3C4",
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuCqiCWvOxyLM-w4JOFrNVUFiO79evn1Is0NjPY8c8inA6_Nn5_MMFIWtxH_jfUjJkZ3ImfQW-SOOd5Boh2HZ3LPXh7OhirxO7LrzcsGX-svpsC6pJ2N6WSngxuYNv-0ac5KLDGL50FSXnWY1rkFvUYHZ5REh2XeE2SIQNT-kvbkm_oBI71SjLqBO4Jo2bzqNDxK2N2SWpo2RrE5h2_JFDHDSHIQ6nwCfeoz5kopFSF9X3tJ4zNcoutBQnaTHfvOIMwxJylEZOIJEks",
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuCl8eA2H8dyxxXpR-YQ85XyuFj2ee6-VNh2DxuzN6TUauNfXojvKr_xonX415aQuICRxHsbwvRknaq4aldCuxW-5xGFz7ZwNN31_R9GLNSJ5_EJ3wai2V-sgj9SXlWEc3D4G-8g8pfnsWmYWNOWN4sSrW3NttU-gKbWoq-o0bIqiWNJhqUIKtO4hlC4bmFO81ngmfrFwVdRWRuS5fIj4rEv60TBTEhTSKxZ_fFBKWa8OpdDymKlsO4vK3GyJiM7WtJXHFFKWSXDkqM",
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuDvVs_Gjn4n-DYtH0YEGqpstHfAYTuB7epyfNzwZ4llwAJDj6LynZZl6DABFz6pfQClsO_WB5YjrPEUNhHwZovOq1t6EPBWaxAkPpA8u7Es3hfritqgT15AkroAo-uYNBfvR5kYsXraEnu_r0YmkXgikbUr1gd046Oe8KGDX1wqNdQisxFqmaD04bkMhkR7oMMaGDUlvU3CZMSEJctkex98bY5Xk0pzX1G7DdgLA7odDPCRTAg1bRWancsi8HANU3__NnOk7cbnk4k",
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuAsjRCub9pCVh0k6VCAYd9lIeoE9LDdNB1ierz6Ho0ke-JPWjb0Gfv2BycS1jwv6RKj9LlpaKoHhCdjiKmECK46zO0Br_7G8YgWYlwVjcDIdm4bg9hJDKeEO5xQmfVkWDRMtpCfXut-sFkTCivfgUupRtOpMKS65xC-XMzT_O7nPIZmoLI_dMb5e9GbsXJIw3gUyTLOr4pD0ZW8Dfrds1enXj65YV6Gf5-BS1Jn5sMCNF6GHMmpkowH5vnurD0wbeTExEmUj0HfBBw"
+      ];
+      previewImg = mockImages[index % mockImages.length];
+    }
+
+    return {
+      id: tpl.id,
+      title: tpl.name,
+      major: major,
+      majorLabel: major === "it" ? "IT / Dev" : major === "designer" ? "Design" : major === "journalist" ? "Journalist" : major === "economics" ? "Economics" : "Other",
+      price: priceStr,
+      tag: tpl.sales_count > 5 ? "Bán chạy" : "",
+      image: previewImg
+    };
+  }) : [];
 
   const getMajorLabel = (major: string, fallback: string) => {
     const key = `cat.${major}`;
@@ -324,18 +315,20 @@ export default function Home() {
         <section className="pb-20">
           <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence mode="popLayout">
-              {filteredTemplates.map((tItem, index) => (
-                <motion.div 
-                  key={tItem.id} 
-                  layout
-                  initial={{ opacity: 0, y: 60 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  viewport={{ once: false, amount: 0.1 }}
-                  transition={{ duration: 0.5, delay: (index % 3) * 0.1 }}
-                  whileHover={{ y: -6 }}
-                  className="group border border-[#1d1a24]/10 dark:border-white/8 hover:border-[#630ed4]/40 transition-all duration-300 bg-white/60 dark:bg-white/[0.03] shadow-sm hover:shadow-md"
-                >
+              {filteredTemplates.map((tItem, index) => {
+                const isOwned = ownedTemplates?.find((o: any) => o.id === tItem.id);
+                return (
+                  <motion.div 
+                    key={tItem.id} 
+                    layout
+                    initial={{ opacity: 0, y: 60 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    viewport={{ once: false, amount: 0.1 }}
+                    transition={{ duration: 0.5, delay: (index % 3) * 0.1 }}
+                    whileHover={{ y: -6 }}
+                    className="group border border-[#1d1a24]/10 dark:border-white/8 hover:border-[#630ed4]/40 transition-all duration-300 bg-white/60 dark:bg-white/[0.03] shadow-sm hover:shadow-md flex flex-col"
+                  >
                   {/* Image */}
                   <div className="aspect-[4/3] overflow-hidden bg-[#f0eaf8] dark:bg-[#1a1525]">
                     <img
@@ -367,20 +360,28 @@ export default function Home() {
                       </span>
                     </div>
                     
+                    {isOwned ? (
+                      <div className="mb-3 flex items-center justify-between border-t border-[#1d1a24]/5 dark:border-white/5 pt-3">
+                        <span className="text-[10px] font-bold text-[#630ed4] bg-[#630ed4]/10 px-2 py-1 rounded">Đang sở hữu</span>
+                        <CountdownTimer expiresAt={isOwned.expires_at} />
+                      </div>
+                    ) : null}
+
                     <motion.div
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      className="mt-auto"
                     >
                       <Link
                         href={`/templates/${tItem.id}`}
                         className="block w-full py-2.5 text-center text-xs font-bold tracking-widest uppercase bg-[#1d1a24] dark:bg-white text-white dark:text-[#0b0912] hover:bg-[#630ed4] dark:hover:bg-[#c084fc] dark:hover:text-white transition-colors"
                       >
-                        {t("tpl.buy")}
+                        {isOwned ? "Xem chi tiết" : t("tpl.buy")}
                       </Link>
                     </motion.div>
                   </div>
                 </motion.div>
-              ))}
+              )})}
             </AnimatePresence>
           </motion.div>
         </section>

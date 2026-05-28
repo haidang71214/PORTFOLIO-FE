@@ -62,4 +62,6 @@ export const profileEndpoint = {
 export const templatesEndpoint = {
   GET_ALL: "/templates",
   GET_ONE: (id: string) => `/templates/${id}`,
+  ADMIN_GRANT: "/templates/admin/grant",
+  GET_OWNED: "/templates/me/owned",
 } as const;

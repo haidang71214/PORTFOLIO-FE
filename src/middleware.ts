@@ -15,25 +15,39 @@ export function middleware(request: NextRequest) {
   const isAdminSubdomain = adminHosts.includes(cleanHost);
 
   if (isAdminSubdomain) {
-    // 1. If accessing "/"
-    if (url.pathname === "/") {
-      const cookieName =
-        process.env.NEXT_PUBLIC_ACCESS_TOKEN ||
-        "portfolio_access_tadasdasdazxzxczxcken";
-      const hasToken = request.cookies.has(cookieName);
+    const cookieName =
+      process.env.NEXT_PUBLIC_ACCESS_TOKEN ||
+      "portfolio_access_tadasdasdazxzxczxcken";
+    const hasToken = request.cookies.has(cookieName);
 
-      if (!hasToken) {
-        url.pathname = "/auth/login";
-        return NextResponse.redirect(url);
-      } else {
-        url.pathname = "/manager/portfolio";
+    // 1. If accessing auth paths
+    if (url.pathname.startsWith("/auth")) {
+      if (url.pathname === "/auth/login") {
+        if (hasToken) {
+          url.pathname = "/";
+          return NextResponse.redirect(url);
+        }
+        url.pathname = "/auth/admin-login";
         return NextResponse.rewrite(url);
       }
+      return NextResponse.next();
     }
 
-    // 2. If accessing standard login "/auth/login", rewrite to custom admin login page
-    if (url.pathname === "/auth/login") {
-      url.pathname = "/auth/admin-login";
+    // 2. If not logged in
+    if (!hasToken) {
+      url.pathname = "/auth/login";
+      return NextResponse.redirect(url);
+    }
+
+    // 3. If logged in, block user-only paths
+    if (url.pathname.startsWith("/manager/portfolio")) {
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
+
+    // 4. Rewrite remaining paths to /admin/
+    if (!url.pathname.startsWith("/admin")) {
+      url.pathname = `/admin${url.pathname}`;
       return NextResponse.rewrite(url);
     }
   }

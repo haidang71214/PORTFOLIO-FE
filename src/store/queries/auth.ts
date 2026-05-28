@@ -1,5 +1,6 @@
 import { authEndpoint } from "@/constants/endpoints";
 import {
+  AuthUser,
   ExtendTokenResponse,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
@@ -134,6 +135,60 @@ export const authApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ["User"],
     }),
+
+    // ─── GET /users ────────────────────────────────────────
+    // Response: AuthUser[]
+    getAllUsers: builder.query<AuthUser[], void>({
+      query: () => ({
+        url: "/users",
+        method: "GET",
+      }),
+      providesTags: ["User"],
+    }),
+
+    // ─── POST /users ───────────────────────────────────────
+    // Response: AuthUser
+    adminCreateUser: builder.mutation<AuthUser, any>({
+      query: (params) => {
+        const formData = new FormData();
+        formData.append("username", params.username);
+        formData.append("email", params.email);
+        formData.append("password", params.password);
+        formData.append("major", params.major);
+        formData.append("role", params.role);
+        if (params.images) {
+          formData.append("images", params.images);
+        }
+        return {
+          url: "/users",
+          method: "POST",
+          body: formData,
+          formData: true,
+        };
+      },
+      invalidatesTags: ["User"],
+    }),
+
+    // ─── PATCH /users/:id ──────────────────────────────────
+    // Response: AuthUser
+    adminUpdateUser: builder.mutation<AuthUser, { id: string; body: any }>({
+      query: ({ id, body }) => {
+        const formData = new FormData();
+        if (body.username) formData.append("username", body.username);
+        if (body.major) formData.append("major", body.major);
+        if (body.password) formData.append("password", body.password);
+        if (body.images) {
+          formData.append("images", body.images);
+        }
+        return {
+          url: `/users/${id}`,
+          method: "PATCH",
+          body: formData,
+          formData: true,
+        };
+      },
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -146,4 +201,7 @@ export const {
   useExtendTokenMutation,
   useGetMeQuery,
   useUpdateMeMutation,
+  useGetAllUsersQuery,
+  useAdminCreateUserMutation,
+  useAdminUpdateUserMutation,
 } = authApi;

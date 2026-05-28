@@ -176,6 +176,15 @@ export const profileApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: "Experiences" }],
     }),
 
+    // GET /profile — Admin (lấy tất cả danh sách portfolio)
+    getAllPortfolios: builder.query<any[], void>({
+      query: () => ({
+        url: "/profile",
+        method: "GET",
+      }),
+      providesTags: ["Profile"],
+    }),
+
   }),
 });
 
@@ -278,6 +287,7 @@ export const {
   // Profile
   useGetProfileQuery,
   useUpdateMyPortfolioMutation,
+  useGetAllPortfoliosQuery,
   // Theme (user)
   useChangeMyThemeMutation,
   // Skills (user)

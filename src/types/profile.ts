@@ -48,14 +48,24 @@ export interface UpdatePortfolioResponse {
 export interface ThemeTemplate {
   id: string;
   name: string;
+  slug: string;
   description: string | null;
-  preview_url: string | null;
-  major: string | null;
-  is_active: boolean;
+  preview_url: string | null;            // compatibility
+  previewImageUrls?: string[];            // new multiple preview images
+  preview_images?: any;                  // compatibility with backend database
+  major: string | null;                  // compatibility
+  targetMajor: string;                   // target profession major
+  target_major?: string;                 // compatibility with backend snake_case
+  price?: number;
+  stockLimit?: number | null;
+  defaultConfig?: string | null;
+  isActive?: boolean;                    // new boolean isActive
+  is_active: boolean;                    // compatibility
   created_at: string;
 }
 
 export type GetAllTemplatesResponse = ThemeTemplate[];
+
 
 // Request: PATCH /profile/me/theme
 export interface ChangeThemeRequest {

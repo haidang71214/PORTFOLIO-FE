@@ -10,11 +10,15 @@ import { AuthModalProvider } from "@/context/AuthModalContext";
 import { I18nProvider } from "@/context/I18nContext";
 import "@/app/auth/auth.css";
 
-// Suppress React 19 next-themes script tag console warning
+// Suppress React 19 next-themes script tag and internal console warnings
 if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
   const origError = console.error;
   console.error = (...args: any[]) => {
-    if (typeof args[0] === "string" && args[0].includes("Encountered a script tag")) return;
+    if (typeof args[0] === "string") {
+      if (args[0].includes("Encountered a script tag") || args[0].includes("Expected static flag was missing")) {
+        return;
+      }
+    }
     origError(...args);
   };
 }

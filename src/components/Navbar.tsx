@@ -24,31 +24,40 @@ import { useGetMeQuery } from "@/store/queries/auth";
 import webStorageClient from "@/utils/webStorageClient";
 import ThemeToggle from "@/Provider/ThemeToggle";
 import LanguageToggle from "@/components/LanguageToggle";
-import { Sparkles, LogOut, User, ShoppingBag, Mail, Home, Shield, UserCog, Settings } from "lucide-react";
+import { Sparkles, LogOut, User, ShoppingBag, Mail, Home, Shield, Settings } from "lucide-react";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { useI18n } from "@/context/I18nContext";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
   const pathname = usePathname();
+  if (pathname?.startsWith("/admin") || pathname === "/auth/admin-login") {
+    return null;
+  }
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { isAuthenticatedAccount, user } = useAppSelector((state) => state.auth);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { openLogin, openRegister } = useAuthModal();
   const { t } = useI18n();
 
-  // Gọi /auth/me khi mount để tự động set cờ auth + user vào Redux.
-  // Skip nếu chưa có access token (tránh gọi thừa khi chưa login).
   const hasToken = !!webStorageClient.getToken();
   useGetMeQuery(undefined, { skip: !hasToken });
 
-  // Close mobile menu and dropdown on path change
   useEffect(() => {
     setIsMenuOpen(false);
     setIsDropdownOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleLogout = () => {
     dispatch(clearLoginToken());
@@ -61,73 +70,78 @@ export default function Navbar() {
 
   return (
     <HeroNavbar
-      isBordered
+      isBordered={false}
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
-      className="bg-background/80 backdrop-blur-md border-zinc-200/50 dark:border-zinc-800/50 fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? "bg-white/60 dark:bg-zinc-950/60 backdrop-blur-xl border-b border-zinc-200/50 dark:border-white/10 shadow-sm"
+          : "bg-transparent border-b border-transparent"
+      }`}
       maxWidth="xl"
       classNames={{
+        wrapper: "px-4 sm:px-6",
         item: [
           "flex",
           "relative",
           "h-full",
           "items-center",
-          "data-[active=true]:after:content-['']",
-          "data-[active=true]:after:absolute",
-          "data-[active=true]:after:bottom-0",
-          "data-[active=true]:after:left-0",
-          "data-[active=true]:after:right-0",
-          "data-[active=true]:after:h-[2px]",
-          "data-[active=true]:after:rounded-t-full",
-          "data-[active=true]:after:bg-primary",
         ],
       }}
     >
-      {/* Brand logo (Animate in from the Left) */}
-      <NavbarContent justify="start">
+      {/* Brand logo */}
+      <NavbarContent justify="start" className="gap-2">
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          className="sm:hidden"
+          className="sm:hidden text-zinc-700 dark:text-zinc-300"
         />
-        <NavbarBrand className="gap-2">
+        <NavbarBrand>
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <Link href="/" className="flex items-center gap-2 text-current no-underline hover:opacity-90">
-              <div className="p-2 border-2 border-zinc-900 dark:border-zinc-100 bg-transparent text-zinc-900 dark:text-zinc-100 rounded-none">
-                <Sparkles size={18} className="stroke-[2.5] animate-pulse" />
+            <Link href="/" className="flex items-center gap-2.5 text-current no-underline group">
+              <div className="relative flex items-center justify-center p-1.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 text-primary ring-1 ring-primary/20 group-hover:ring-primary/40 group-hover:shadow-[0_0_15px_rgba(var(--primary),0.3)] transition-all duration-300">
+                <Sparkles size={16} className="animate-pulse" />
               </div>
-              <p className="font-mono text-sm md:text-base font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-100 border-2 border-zinc-900 dark:border-zinc-100 px-3 py-1 bg-transparent hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900 transition-colors duration-300">
-                DEN DEN PROJECT
-              </p>
+              <span className="font-sans text-lg font-bold tracking-tight bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400 bg-clip-text text-transparent group-hover:from-primary group-hover:to-primary/70 transition-all duration-300">
+                DenDen
+              </span>
             </Link>
           </motion.div>
         </NavbarBrand>
       </NavbarContent>
 
-      {/* Desktop Menu (Animate in with staggered delay from Top) */}
-      <NavbarContent className="hidden sm:flex gap-8" justify="center">
+      {/* Desktop Menu */}
+      <NavbarContent className="hidden sm:flex gap-1" justify="center">
         {navItems.map((item, idx) => {
           const isActive = pathname === item.href;
           return (
             <NavbarItem key={item.href} isActive={isActive}>
               <motion.div
-                initial={{ opacity: 0, y: -25 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: idx * 0.1, ease: "easeOut" }}
+                transition={{ duration: 0.5, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
               >
                 <Link
                   href={item.href}
-                  className={`text-sm font-medium transition-colors py-2 flex items-center gap-1.5 ${
+                  className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 overflow-hidden ${
                     isActive
-                      ? "text-primary font-semibold"
-                      : "text-zinc-600 dark:text-zinc-400 hover:text-primary dark:hover:text-primary-400"
+                      ? "text-primary bg-primary/10"
+                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/50"
                   }`}
                 >
-                  <item.icon size={16} />
-                  {item.label}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeNavIndicator"
+                      className="absolute inset-0 bg-primary/10 rounded-full"
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                  <item.icon size={15} className="relative z-10" />
+                  <span className="relative z-10">{item.label}</span>
                 </Link>
               </motion.div>
             </NavbarItem>
@@ -135,49 +149,24 @@ export default function Navbar() {
         })}
       </NavbarContent>
 
-      {/* Action Buttons (Animate in from the Right) */}
-      <NavbarContent justify="end" className="gap-4">
-        {/* Language Toggle */}
-        <NavbarItem>
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
-          >
-            <LanguageToggle />
-          </motion.div>
-        </NavbarItem>
+      {/* Action Buttons */}
+      <NavbarContent justify="end" className="gap-2 sm:gap-4">
+        {/* Utilities Container */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="hidden md:flex items-center gap-1 p-1 rounded-full bg-zinc-100/50 dark:bg-zinc-900/50 border border-zinc-200/50 dark:border-zinc-800/50"
+        >
+          <LanguageToggle />
+          <div className="w-[1px] h-4 bg-zinc-300 dark:bg-zinc-700 mx-1"></div>
+          <ThemeToggle />
+        </motion.div>
 
-        {/* Theme Toggle */}
-        <NavbarItem>
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
-          >
-            <ThemeToggle />
-          </motion.div>
-        </NavbarItem>
-
-        {/* Custom Order / Contact Button for Desktop */}
-        <NavbarItem className="hidden md:flex">
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: 0.3, ease: "easeOut" }}
-          >
-            <Button
-              as={Link}
-              href="/contact"
-              variant="light"
-              color="primary"
-              startContent={<Mail size={16} />}
-              className="font-semibold text-sm rounded-xl"
-            >
-              {t("nav.contact")}
-            </Button>
-          </motion.div>
-        </NavbarItem>
+        {/* Mobile Utilities (Just Icons) */}
+        <div className="flex md:hidden items-center gap-2">
+          <ThemeToggle />
+        </div>
 
         {/* Auth section */}
         {isAuthenticatedAccount && user ? (
@@ -185,14 +174,14 @@ export default function Navbar() {
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.4, ease: "easeOut" }}
+              transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Dropdown isOpen={isDropdownOpen} onOpenChange={setIsDropdownOpen} placement="bottom-end" className="bg-background/95 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-800/50">
+              <Dropdown isOpen={isDropdownOpen} onOpenChange={setIsDropdownOpen} placement="bottom-end" className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xl rounded-2xl">
                 <DropdownTrigger>
                   <Avatar
                     isBordered
                     as="button"
-                    className="transition-transform ring-primary/50"
+                    className="transition-transform ring-primary/30 hover:ring-primary/60 cursor-pointer"
                     color="primary"
                     name={user.username}
                     size="sm"
@@ -203,6 +192,11 @@ export default function Navbar() {
                   aria-label="Profile Actions"
                   variant="flat"
                   disabledKeys={["profile"]}
+                  className="p-2"
+                  itemClasses={{
+                    base: "gap-3 rounded-xl",
+                    title: "font-medium text-sm",
+                  }}
                   onAction={(key) => {
                     if (key === "admin") {
                       if (user.role === "admin") router.push("/admin");
@@ -217,17 +211,17 @@ export default function Navbar() {
                     }
                   }}
                 >
-                  <DropdownItem key="profile" className="h-auto py-3 gap-2 opacity-100 cursor-default">
-                    <p className="font-semibold text-xs text-zinc-500 dark:text-zinc-400">{t("nav.role")}</p>
-                    <p className="font-bold text-zinc-800 dark:text-zinc-200">{user.username}</p>
+                  <DropdownItem key="profile" className="h-auto py-3 px-3 gap-2 opacity-100 cursor-default bg-zinc-50 dark:bg-zinc-900/50 rounded-xl mb-2">
+                    <p className="font-semibold text-xs text-zinc-500 dark:text-zinc-400 mb-1">{t("nav.role")}</p>
+                    <p className="font-bold text-zinc-900 dark:text-zinc-100">{user.username}</p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{user.email}</p>
-                    <div className="mt-1.5">
+                    <div className="mt-2">
                       {user.role === "admin" ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2.5 py-1 rounded-full border border-amber-500/20">
                           <Shield size={10} /> Quản trị viên
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2.5 py-1 rounded-full border border-primary/20">
                           <User size={10} /> Người dùng
                         </span>
                       )}
@@ -240,19 +234,19 @@ export default function Navbar() {
                   >
                     Quản lí
                   </DropdownItem>
-                  <DropdownItem key="settings" startContent={<User size={16} />}>
+                  <DropdownItem key="settings" startContent={<User size={16} className="text-zinc-500" />}>
                     {t("nav.profile")}
                   </DropdownItem>
-                  <DropdownItem key="manage-profile" startContent={<Settings size={16} />}>
+                  <DropdownItem key="manage-profile" startContent={<Settings size={16} className="text-zinc-500" />}>
                     {t("nav.manageProfile")}
                   </DropdownItem>
-                  <DropdownItem key="orders" startContent={<ShoppingBag size={16} />}>
+                  <DropdownItem key="orders" startContent={<ShoppingBag size={16} className="text-zinc-500" />}>
                     {t("nav.orders")}
                   </DropdownItem>
                   <DropdownItem
                     key="logout"
                     color="danger"
-                    className="text-danger"
+                    className="text-danger mt-2"
                     startContent={<LogOut size={16} />}
                   >
                     {t("nav.logout")}
@@ -262,16 +256,16 @@ export default function Navbar() {
             </motion.div>
           </NavbarItem>
         ) : (
-          <>
+          <div className="flex items-center gap-2">
             <NavbarItem className="hidden md:flex">
               <motion.div
-                initial={{ opacity: 0, x: 30 }}
+                initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.4, ease: "easeOut" }}
+                transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
               >
                 <button
                   onClick={openLogin}
-                  className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:text-primary dark:hover:text-primary-400 transition-colors bg-transparent border-none cursor-pointer"
+                  className="text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white px-4 py-2 transition-colors bg-transparent border-none cursor-pointer"
                 >
                   {t("nav.login")}
                 </button>
@@ -279,40 +273,45 @@ export default function Navbar() {
             </NavbarItem>
             <NavbarItem>
               <motion.div
-                initial={{ opacity: 0, x: 30 }}
+                initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.5, ease: "easeOut" }}
+                transition={{ duration: 0.5, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
               >
                 <Button
-                  color="primary"
                   onPress={openRegister}
-                  variant="flat"
-                  className="font-semibold text-sm rounded-xl px-4 py-2 bg-primary/10 hover:bg-primary text-primary hover:text-white dark:text-primary-400 dark:hover:text-white transition-all active:scale-95"
+                  className="font-semibold text-sm rounded-full px-5 py-2 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 transition-all active:scale-95 shadow-sm"
                 >
                   {t("nav.register")}
                 </Button>
               </motion.div>
             </NavbarItem>
-          </>
+          </div>
         )}
       </NavbarContent>
 
       {/* Mobile Menu */}
-      <NavbarMenu className="bg-background/95 backdrop-blur-md pt-6 gap-4 border-t border-zinc-200/50 dark:border-zinc-800/50">
+      <NavbarMenu className="bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl pt-6 gap-2 border-t border-zinc-200/50 dark:border-zinc-800/50 px-4">
+        <div className="flex md:hidden items-center justify-between p-3 rounded-2xl bg-zinc-100/50 dark:bg-zinc-900/50 border border-zinc-200/50 dark:border-zinc-800/50 mb-4">
+          <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Tùy chỉnh</span>
+          <div className="flex items-center gap-2">
+            <LanguageToggle />
+          </div>
+        </div>
+
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <NavbarMenuItem key={item.href}>
               <Link
                 href={item.href}
-                className={`w-full py-3 text-lg font-medium border-b border-zinc-100 dark:border-zinc-800/30 flex items-center gap-3 ${
+                className={`w-full py-3 px-4 rounded-2xl text-base font-medium transition-all flex items-center gap-3 ${
                   isActive
-                    ? "text-primary font-bold"
-                    : "text-zinc-700 dark:text-zinc-300 hover:text-primary"
+                    ? "bg-primary/10 text-primary font-semibold"
+                    : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900"
                 }`}
               >
-                <div className={`p-2 rounded-lg ${isActive ? "bg-primary/15 text-primary" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"}`}>
-                  <item.icon size={20} />
+                <div className={`p-2 rounded-xl ${isActive ? "bg-primary/20 text-primary" : "bg-zinc-200/50 dark:bg-zinc-800 text-zinc-500"}`}>
+                  <item.icon size={18} />
                 </div>
                 {item.label}
               </Link>
@@ -323,28 +322,27 @@ export default function Navbar() {
         <NavbarMenuItem>
           <Link
             href="/contact"
-            className="w-full py-3 text-lg font-medium border-b border-zinc-100 dark:border-zinc-800/30 flex items-center gap-3 text-zinc-700 dark:text-zinc-300"
+            className="w-full py-3 px-4 rounded-2xl text-base font-medium transition-all flex items-center gap-3 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 mt-1"
           >
-            <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
-              <Mail size={20} />
+            <div className="p-2 rounded-xl bg-zinc-200/50 dark:bg-zinc-800 text-zinc-500">
+              <Mail size={18} />
             </div>
             {t("nav.contact")}
           </Link>
         </NavbarMenuItem>
 
         {!isAuthenticatedAccount && (
-          <div className="flex flex-col gap-3 mt-6">
+          <div className="flex flex-col gap-3 mt-6 pt-6 border-t border-zinc-200/50 dark:border-zinc-800/50">
             <Button
               onPress={() => { setIsMenuOpen(false); openLogin(); }}
-              variant="bordered"
-              className="w-full font-semibold border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 rounded-xl"
+              variant="flat"
+              className="w-full font-semibold bg-zinc-100 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 rounded-2xl py-6 text-base"
             >
               {t("nav.login")}
             </Button>
             <Button
               onPress={() => { setIsMenuOpen(false); openRegister(); }}
-              color="primary"
-              className="w-full font-semibold rounded-xl"
+              className="w-full font-semibold rounded-2xl py-6 text-base bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-md"
             >
               {t("nav.register")}
             </Button>
@@ -354,3 +352,4 @@ export default function Navbar() {
     </HeroNavbar>
   );
 }
+

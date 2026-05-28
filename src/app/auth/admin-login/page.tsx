@@ -34,7 +34,7 @@ export default function AdminLoginPage() {
       }
       
       toast.success("Đăng nhập quản trị viên thành công!");
-      router.push("/manager/portfolio");
+      router.push("/");
     } catch (err: any) {
       let errMsg = "Đăng nhập thất bại. Vui lòng thử lại.";
       if (err?.data?.message) {

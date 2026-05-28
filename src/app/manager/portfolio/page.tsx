@@ -21,7 +21,8 @@ import {
   useUpdateExpMutation,
   useDeleteExpMutation,
 } from "@/store/queries/profile";
-import { useGetAllTemplatesQuery } from "@/store/queries/templates";
+import { useGetAllTemplatesQuery, useGetOwnedTemplatesQuery } from "@/store/queries/templates";
+import { CountdownTimer } from "@/components/common/CountdownTimer";
 import { useAuthModal } from "@/context/AuthModalContext";
 import webStorageClient from "@/utils/webStorageClient";
 import { toast } from "sonner";
@@ -65,6 +66,7 @@ export default function ManagerPortfolioPage() {
   // ── Fetch data ──
   const { data: profileData, isLoading: profileLoading } = useGetProfileQuery(user?.id ?? "", { skip: !user?.id });
   const { data: templates,   isLoading: templatesLoading } = useGetAllTemplatesQuery();
+  const { data: ownedTemplates } = useGetOwnedTemplatesQuery(undefined, { skip: !user?.id });
   const { data: skills,      isLoading: skillsLoading }    = useGetSkillsQuery(user?.id ?? "", { skip: !user?.id });
   const { data: certs,       isLoading: certsLoading }     = useGetCertificatesQuery(user?.id ?? "", { skip: !user?.id });
   const { data: exps,        isLoading: expsLoading }      = useGetExperiencesQuery(user?.id ?? "", { skip: !user?.id });
@@ -112,15 +114,19 @@ export default function ManagerPortfolioPage() {
 
   // Populate portfolio from backend
   useEffect(() => {
-    if (profileData?.data) {
-      const p = profileData.data;
-      setTitle(p.title ?? "");
-      setBio(p.bio ?? "");
-      setGithub(p.github ?? "");
-      setLinkedin(p.linkedin ?? "");
-      setWebsite(p.website ?? "");
-      setLocation(p.location ?? "");
-      setSelectedTheme(p.theme_id ?? "");
+    console.log(profileData);
+    
+    if (profileData) {
+      const p = profileData as any;
+      // support both wrapped {data: ...} and unwrapped response
+      const portfolio = p?.data ?? p;
+      setTitle(portfolio?.title ?? "");
+      setBio(portfolio?.bio ?? "");
+      setGithub(portfolio?.github ?? "");
+      setLinkedin(portfolio?.linkedin ?? "");
+      setWebsite(portfolio?.website ?? "");
+      setLocation(portfolio?.location ?? "");
+      setSelectedTheme(portfolio?.theme_id ?? "");
     }
   }, [profileData]);
 
@@ -374,18 +380,66 @@ export default function ManagerPortfolioPage() {
                       <p className="pm-label"><Layout size={11}/>Chọn mẫu giao diện</p>
                       {selectedTheme&&<span className="text-[10px] font-mono text-[var(--pm)] bg-[var(--pm)]/10 px-2 py-0.5 rounded-full">Selected: {selectedTheme.slice(0,8)}…</span>}
                     </div>
+                    {/* Currently applied theme info banner */}
+                    {(() => {
+                      const pf = profileData as any;
+                      const currentThemeId = pf?.data?.theme_id ?? pf?.theme_id ?? null;
+                      if (!currentThemeId) return null;
+                      return (
+                        <div className="mb-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/40">
+                          <div className="w-2 h-2 rounded-full bg-green-500 shrink-0 animate-pulse" />
+                          <span className="text-[11px] font-semibold text-green-700 dark:text-green-400">
+                            Đang áp dụng: <span className="font-bold">{templates?.find(t => t.id === currentThemeId)?.name ?? currentThemeId.slice(0,8) + '…'}</span>
+                          </span>
+                        </div>
+                      );
+                    })()}
                     {templatesLoading ? <div className="flex items-center justify-center py-10 gap-2"><Loader2 className="animate-spin text-[var(--pm)]" size={20}/><span className="text-sm text-zinc-400">Đang tải theme...</span></div>
                       : templates&&templates.length>0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                          {templates.map(t=>(
-                            <button key={t.id} onClick={()=>setSelectedTheme(t.id)} className={`tc text-left ${selectedTheme===t.id?"sel":""}`}>
-                              <div className="aspect-[4/3] bg-gradient-to-br from-[var(--pm)]/10 to-purple-200/20 dark:to-purple-900/20 flex items-center justify-center relative overflow-hidden">
-                                {t.preview_url?<img src={t.preview_url} alt={t.name} className="w-full h-full object-cover"/>:<Layers size={24} className="text-[var(--pm)]/40"/>}
-                                {selectedTheme===t.id&&<div className="absolute inset-0 bg-[var(--pm)]/15 flex items-center justify-center"><div className="w-6 h-6 rounded-full bg-[var(--pm)] flex items-center justify-center"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></div></div>}
-                              </div>
-                              <div className="p-2.5"><p className="text-[11px] font-bold truncate">{t.name}</p>{t.major&&<p className="text-[9px] text-zinc-400 capitalize">{t.major}</p>}{!t.is_active&&<p className="text-[9px] text-red-400 font-bold">Inactive</p>}</div>
-                            </button>
-                          ))}
+                          {templates.map(t => {
+                            const previewImg = t.preview_url || (t.previewImageUrls && t.previewImageUrls[0]) || (Array.isArray(t.preview_images) && t.preview_images[0]);
+                            const major = t.target_major || t.targetMajor || t.major;
+                            const isActive = t.isActive !== undefined ? t.isActive : t.is_active;
+                            const ownedTemplate = ownedTemplates?.find((o: any) => o.id === t.id);
+                            const pf = profileData as any;
+                            const currentThemeId = pf?.data?.theme_id ?? pf?.theme_id ?? null;
+                            const isCurrentlyApplied = currentThemeId === t.id;
+
+                            return (
+                              <button key={t.id} onClick={()=>setSelectedTheme(t.id)} className={`tc text-left relative flex flex-col ${selectedTheme===t.id?"sel":""} ${isCurrentlyApplied ? "ring-2 ring-green-400 ring-offset-1" : ""}`}>
+                                <div className="aspect-[4/3] w-full bg-gradient-to-br from-[var(--pm)]/10 to-purple-200/20 dark:to-purple-900/20 flex items-center justify-center relative overflow-hidden shrink-0">
+                                  {previewImg ? <img src={previewImg} alt={t.name} className="w-full h-full object-cover"/> : <Layers size={24} className="text-[var(--pm)]/40"/>}
+                                  {selectedTheme===t.id&&<div className="absolute inset-0 bg-[var(--pm)]/15 flex items-center justify-center"><div className="w-6 h-6 rounded-full bg-[var(--pm)] flex items-center justify-center"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></div></div>}
+                                  {isCurrentlyApplied && !selectedTheme.includes(t.id) && (
+                                    <div className="absolute top-1.5 left-1.5">
+                                      <span className="text-[9px] font-bold bg-green-500 text-white px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                                        <svg width="7" height="7" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                        Đang dùng
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="p-2.5 flex-1 w-full flex flex-col items-start">
+                                  <p className="text-[11px] font-bold truncate w-full">{t.name}</p>
+                                  {major&&<p className="text-[9px] text-zinc-400 capitalize">{major}</p>}
+                                  {!isActive&&<p className="text-[9px] text-red-400 font-bold">Inactive</p>}
+                                  {isCurrentlyApplied && (
+                                    <span className="mt-1 text-[9px] font-bold text-green-600 dark:text-green-400 flex items-center gap-0.5">
+                                      <svg width="8" height="8" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" fill="currentColor" opacity="0.3"/><path d="M3 6L5 8L9 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                      Đang áp dụng
+                                    </span>
+                                  )}
+                                  {ownedTemplate && (
+                                    <div className="mt-2 flex flex-col items-start gap-1">
+                                      <span className="text-[9px] font-bold text-[var(--pm)] bg-[var(--pm)]/10 px-1.5 py-0.5 rounded">Đang sở hữu</span>
+                                      <CountdownTimer expiresAt={ownedTemplate.expires_at} />
+                                    </div>
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
                         </div>
                       ) : <div className="flex flex-col items-center justify-center py-10 gap-2"><Info size={28} className="text-zinc-300 dark:text-zinc-600"/><p className="text-sm text-zinc-400">Chưa có theme nào.</p></div>}
                   </div>

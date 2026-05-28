@@ -8,6 +8,14 @@ html {
   /* ~14px thay vì 16px */
 }
 
+/* ── Custom Cursor — hide default OS pointer on non-touch devices ── */
+@media (pointer: fine) {
+  *,
+  *:hover {
+    cursor: none !important;
+  }
+}
+
 /* Modern Auto-hiding Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
