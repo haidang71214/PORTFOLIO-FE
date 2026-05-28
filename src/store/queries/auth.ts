@@ -11,6 +11,8 @@ import {
   RegisterResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  UpdateMeRequest,
+  UpdateMeResponse,
 } from "@/types";
 import { baseApi } from "../base";
 
@@ -108,6 +110,30 @@ export const authApi = baseApi.injectEndpoints({
       }),
       providesTags: ["User"],
     }),
+
+    // ─── PATCH /users/me ───────────────────────────────────
+    // Request: multipart/form-data
+    // Response: AuthUser
+    updateMe: builder.mutation<UpdateMeResponse, UpdateMeRequest>({
+      query: (params) => {
+        const formData = new FormData();
+        if (params.username) formData.append("username", params.username);
+        if (params.email) formData.append("email", params.email);
+        if (params.password) formData.append("password", params.password);
+        if (params.major) formData.append("major", params.major);
+        if (params.role) formData.append("role", params.role);
+        if (params.images) {
+          formData.append("images", params.images);
+        }
+        return {
+          url: authEndpoint.UPDATE_ME,
+          method: "PATCH",
+          body: formData,
+          formData: true,
+        };
+      },
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -119,4 +145,5 @@ export const {
   useLogoutMutation,
   useExtendTokenMutation,
   useGetMeQuery,
+  useUpdateMeMutation,
 } = authApi;

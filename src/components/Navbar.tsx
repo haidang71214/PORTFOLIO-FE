@@ -17,8 +17,7 @@ import {
   DropdownMenu,
   Avatar,
 } from "@heroui/react";
-import { usePathname } from "next/navigation";
-import NextLink from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/utils/redux";
 import { clearLoginToken } from "@/store/slices/auth";
 import { useGetMeQuery } from "@/store/queries/auth";
@@ -32,6 +31,7 @@ import { motion } from "framer-motion";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const { isAuthenticatedAccount, user } = useAppSelector((state) => state.auth);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -96,11 +96,11 @@ export default function Navbar() {
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
             <Link href="/" className="flex items-center gap-2 text-current no-underline hover:opacity-90">
-              <div className="p-2 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary animate-pulse">
-                <Sparkles size={20} className="stroke-[2.5]" />
+              <div className="p-2 border-2 border-zinc-900 dark:border-zinc-100 bg-transparent text-zinc-900 dark:text-zinc-100 rounded-none">
+                <Sparkles size={18} className="stroke-[2.5] animate-pulse" />
               </div>
-              <p className="font-bold text-lg md:text-xl tracking-tight bg-gradient-to-r from-violet-600 via-fuchsia-500 to-amber-500 dark:from-violet-400 dark:via-fuchsia-400 dark:to-amber-400 bg-clip-text text-transparent">
-               Đen Đen Project
+              <p className="font-mono text-sm md:text-base font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-100 border-2 border-zinc-900 dark:border-zinc-100 px-3 py-1 bg-transparent hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900 transition-colors duration-300">
+                DEN DEN PROJECT
               </p>
             </Link>
           </motion.div>
@@ -203,6 +203,19 @@ export default function Navbar() {
                   aria-label="Profile Actions"
                   variant="flat"
                   disabledKeys={["profile"]}
+                  onAction={(key) => {
+                    if (key === "admin") {
+                      if (user.role === "admin") router.push("/admin");
+                    } else if (key === "settings") {
+                      router.push("/profile");
+                    } else if (key === "manage-profile") {
+                      router.push("/manager/portfolio");
+                    } else if (key === "orders") {
+                      router.push("/my-orders");
+                    } else if (key === "logout") {
+                      handleLogout();
+                    }
+                  }}
                 >
                   <DropdownItem key="profile" className="h-auto py-3 gap-2 opacity-100 cursor-default">
                     <p className="font-semibold text-xs text-zinc-500 dark:text-zinc-400">{t("nav.role")}</p>
@@ -222,30 +235,24 @@ export default function Navbar() {
                   </DropdownItem>
                   <DropdownItem
                     key="admin"
-                    as={NextLink}
-                    href={user.role === "admin" ? "/admin" : ""}
                     startContent={<Shield size={16} className={user.role === "admin" ? "text-amber-500" : "text-transparent"} />}
                     className={user.role === "admin" ? "text-amber-600 dark:text-amber-400 font-semibold" : "hidden"}
                   >
                     Quản lí
                   </DropdownItem>
-                  <DropdownItem key="settings" as={NextLink} href="/profile" startContent={<User size={16} />}>
+                  <DropdownItem key="settings" startContent={<User size={16} />}>
                     {t("nav.profile")}
                   </DropdownItem>
-                  <DropdownItem key="edit-profile" as={NextLink} href="/profile/edit" startContent={<UserCog size={16} />}>
-                    {t("nav.editProfile")}
-                  </DropdownItem>
-                  <DropdownItem key="manage-profile" as={NextLink} href="/profile/manage" startContent={<Settings size={16} />}>
+                  <DropdownItem key="manage-profile" startContent={<Settings size={16} />}>
                     {t("nav.manageProfile")}
                   </DropdownItem>
-                  <DropdownItem key="orders" as={NextLink} href="/my-orders" startContent={<ShoppingBag size={16} />}>
+                  <DropdownItem key="orders" startContent={<ShoppingBag size={16} />}>
                     {t("nav.orders")}
                   </DropdownItem>
                   <DropdownItem
                     key="logout"
                     color="danger"
                     className="text-danger"
-                    onPress={handleLogout}
                     startContent={<LogOut size={16} />}
                   >
                     {t("nav.logout")}

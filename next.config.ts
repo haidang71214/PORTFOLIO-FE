@@ -55,6 +55,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  devIndicators: {
+    // @ts-ignore
+    appIsrStatus: false,
+  },
   experimental: {
     useLightningcss: true, // Lightning CSS cho Tailwind v4 + Next.js 15+
   },

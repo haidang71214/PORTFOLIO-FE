@@ -10,6 +10,15 @@ import { AuthModalProvider } from "@/context/AuthModalContext";
 import { I18nProvider } from "@/context/I18nContext";
 import "@/app/auth/auth.css";
 
+// Suppress React 19 next-themes script tag console warning
+if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+  const origError = console.error;
+  console.error = (...args: any[]) => {
+    if (typeof args[0] === "string" && args[0].includes("Encountered a script tag")) return;
+    origError(...args);
+  };
+}
+
 export interface ProvidersProps {
   children: React.ReactNode;
 }

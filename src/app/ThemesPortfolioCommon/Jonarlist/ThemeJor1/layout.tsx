@@ -1,16 +1,7 @@
-import type { Metadata } from "next";
-import SideNav from "./_components/SideNav";
-
-export const metadata: Metadata = {
-  title: "The Inkwell | Journalist Portfolio",
-  description:
-    "A premium journalist portfolio theme — investigative reportage, urban culture, and socio-political storytelling.",
-};
-
 export default function ThemeJor1Layout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode;  
 }) {
   return (
     <>
@@ -48,13 +39,13 @@ export default function ThemeJor1Layout({
       </div>
       {/* Floating coffee cup decoration */}
       <div className="fixed bottom-20 right-20 opacity-[0.07] pointer-events-none z-0 animate-[jor1float_7s_ease-in-out_infinite]">
-        <span className="material-symbols-outlined text-[160px] text-[#b52426] -rotate-12 block">
+        <span className="material-symbols-outlined text-[160px] text-[#a200ba] -rotate-12 block">
           coffee
         </span>
       </div>
       {/* Ink splats */}
       <div className="fixed top-1/2 left-1/4 w-4 h-4 rounded-full bg-[#030813] opacity-30 pointer-events-none z-0 blur-[0.5px]" />
-      <div className="fixed top-3/4 right-1/4 w-6 h-6 rounded-full bg-[#b52426] opacity-15 pointer-events-none z-0 blur-[0.5px]" />
+      <div className="fixed top-3/4 right-1/4 w-6 h-6 rounded-full bg-[#a200ba] opacity-15 pointer-events-none z-0 blur-[0.5px]" />
 
       <style>{`
         @keyframes jor1float {
@@ -68,10 +59,6 @@ export default function ThemeJor1Layout({
           font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
         }
       `}</style>
-
-      {/* Side Navigation */}
-      <SideNav />
-
       {/* Page content — offset from sidebar on md+ */}
       <div className="md:ml-64 relative z-10 min-h-screen px-6 md:px-10 py-10 overflow-x-hidden">
         {children}

@@ -148,3 +148,15 @@ export interface ApiError {
 
 export type ErrorForm = ApiError;
 
+// ---------- UPDATE ME ----------
+export interface UpdateMeRequest {
+  username?: string;
+  email?: string;
+  password?: string;
+  major?: "it" | "journalist" | "designer" | "economics" | "other";
+  role?: "admin" | "user";
+  images?: File;
+}
+
+export type UpdateMeResponse = AuthUser;
+
