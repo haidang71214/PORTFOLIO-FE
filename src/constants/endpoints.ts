@@ -65,3 +65,23 @@ export const templatesEndpoint = {
   ADMIN_GRANT: "/templates/admin/grant",
   GET_OWNED: "/templates/me/owned",
 } as const;
+
+// ============================================
+// JOURNALIST ENDPOINTS
+// ============================================
+export const journalistEndpoint = {
+  // Public GET
+  GET_ARTICLES:          (userId: string) => `/journalist/articles/user/${userId}`,
+  GET_ARTICLE_DETAIL:    (id: string)     => `/journalist/articles/${id}`,
+
+  // User mutations
+  CREATE_ARTICLE:                            "/journalist/articles",
+  UPDATE_ARTICLE:        (id: string)     => `/journalist/articles/${id}`,
+  DELETE_ARTICLE:        (id: string)     => `/journalist/articles/${id}`,
+
+  // Admin mutations
+  ADMIN_CREATE_ARTICLE:  (userId: string) => `/journalist/manage/articles/${userId}`,
+  ADMIN_UPDATE_ARTICLE:  (id: string)     => `/journalist/manage/articles/${id}`,
+  ADMIN_DELETE_ARTICLE:  (id: string)     => `/journalist/manage/articles/${id}`,
+} as const;
+

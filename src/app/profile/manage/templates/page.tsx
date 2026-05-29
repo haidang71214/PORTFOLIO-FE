@@ -60,7 +60,7 @@ export default function OwnedTemplatesPage() {
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="text-xl font-bold text-gray-900 truncate">{tpl.name}</h3>
                       <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                        {tpl.target_major.toUpperCase()}
+                        {(tpl.target_major || tpl.targetMajor || "").toUpperCase()}
                       </span>
                     </div>
                     <p className="text-sm text-gray-500 mb-4 line-clamp-2 flex-1">

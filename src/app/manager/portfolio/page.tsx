@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/utils/redux";
 import { useGetMeQuery } from "@/store/queries/auth";
@@ -21,6 +21,12 @@ import {
   useUpdateExpMutation,
   useDeleteExpMutation,
 } from "@/store/queries/profile";
+import {
+  useGetArticlesQuery,
+  useCreateArticleMutation,
+  useUpdateArticleMutation,
+  useDeleteArticleMutation,
+} from "@/store/queries/journalist";
 import { useGetAllTemplatesQuery, useGetOwnedTemplatesQuery } from "@/store/queries/templates";
 import { CountdownTimer } from "@/components/common/CountdownTimer";
 import { useAuthModal } from "@/context/AuthModalContext";
@@ -31,14 +37,16 @@ import {
   Loader2, Shield, User, Briefcase, MapPin, Github, Linkedin, Globe,
   FileText, ExternalLink, Save, X, Palette, Layout, ChevronRight,
   Settings, Eye, Layers, Info, Star, Award, Plus, Trash2,
-  Building2, Calendar, Code2,
+  Building2, Calendar, Code2, Newspaper, Link2, Tag,
 } from "lucide-react";
-import type { Skill, Certificate, Experience, UpsertSkillRequest, UpsertCertRequest, UpsertExpRequest } from "@/types";
+import type { Skill, Certificate, Experience, UpsertSkillRequest, UpsertCertRequest, UpsertExpRequest, JournalistArticle, CreateArticleRequest, JournalistCategory } from "@/types";
 
 // ── Section IDs ───────────────────────────────────────────────────────────────
-type SectionId = "portfolio" | "theme" | "skills" | "certificates" | "experience";
+type SectionId = "portfolio" | "theme" | "skills" | "certificates" | "experience" | "articles";
 
-const sidebarItems: { id: SectionId; label: string; icon: React.ElementType; desc: string }[] = [
+type SidebarItem = { id: SectionId; label: string; icon: React.ElementType; desc: string };
+
+const BASE_SIDEBAR_ITEMS: SidebarItem[] = [
   { id: "portfolio",    label: "Thông tin Portfolio", icon: FileText,  desc: "Title, Bio, Links xã hội" },
   { id: "theme",        label: "Giao diện (Theme)",   icon: Palette,   desc: "Chọn mẫu portfolio" },
   { id: "skills",       label: "Kỹ năng",             icon: Code2,     desc: "Quản lí Skills" },
@@ -46,10 +54,28 @@ const sidebarItems: { id: SectionId; label: string; icon: React.ElementType; des
   { id: "experience",   label: "Kinh nghiệm",         icon: Briefcase, desc: "Quản lí Experiences" },
 ];
 
+const JOURNALIST_SIDEBAR_ITEM: SidebarItem = { id: "articles", label: "Bài báo", icon: Newspaper, desc: "Quản lí bài báo đã xuất bản" };
+
+const CATEGORY_OPTIONS: { value: string; label: string }[] = [
+  { value: "politics", label: "Chính trị" },
+  { value: "economics", label: "Kinh tế" },
+  { value: "society", label: "Xã hội" },
+  { value: "culture", label: "Văn hóa" },
+  { value: "technology", label: "Công nghệ" },
+  { value: "education", label: "Giáo dục" },
+  { value: "health", label: "Sức khỏe" },
+  { value: "sports", label: "Thể thao" },
+  { value: "entertainment", label: "Giải trí" },
+  { value: "environment", label: "Môi trường" },
+  { value: "science", label: "Khoa học" },
+  { value: "investigation", label: "Điều tra" },
+];
+
 // ─────────────────────────────────────────────────────────────────────────────
 const EMPTY_SKILL:   UpsertSkillRequest  = { name: "", level: undefined, category: "" };
 const EMPTY_CERT:    UpsertCertRequest   = { name: "", organization: "", issue_date: "", expiration_date: "", credential_id: "", credential_url: "" };
 const EMPTY_EXP:     UpsertExpRequest    = { company_name: "", position: "", start_date: "", end_date: "", description: "" };
+const EMPTY_ARTICLE: CreateArticleRequest = { title: "", contentUrl: "", publisherName: "", summary: "", category: undefined, publishedAt: "", tags: [] };
 
 export default function ManagerPortfolioPage() {
   const router = useRouter();
@@ -63,6 +89,14 @@ export default function ManagerPortfolioPage() {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => { setIsMounted(true); }, []);
 
+  // ── Dynamic sidebar items based on user major ──
+  const isJournalist = user?.major === "journalist";
+  const sidebarItems = useMemo<SidebarItem[]>(() => {
+    const items = [...BASE_SIDEBAR_ITEMS];
+    if (isJournalist) items.push(JOURNALIST_SIDEBAR_ITEM);
+    return items;
+  }, [isJournalist]);
+
   // ── Fetch data ──
   const { data: profileData, isLoading: profileLoading } = useGetProfileQuery(user?.id ?? "", { skip: !user?.id });
   const { data: templates,   isLoading: templatesLoading } = useGetAllTemplatesQuery();
@@ -70,6 +104,7 @@ export default function ManagerPortfolioPage() {
   const { data: skills,      isLoading: skillsLoading }    = useGetSkillsQuery(user?.id ?? "", { skip: !user?.id });
   const { data: certs,       isLoading: certsLoading }     = useGetCertificatesQuery(user?.id ?? "", { skip: !user?.id });
   const { data: exps,        isLoading: expsLoading }      = useGetExperiencesQuery(user?.id ?? "", { skip: !user?.id });
+  const { data: articles,    isLoading: articlesLoading }   = useGetArticlesQuery(user?.id ?? "", { skip: !user?.id || !isJournalist });
 
   // ── Mutations — User ──
   const [updatePortfolio, { isLoading: savingPortfolio }] = useUpdateMyPortfolioMutation();
@@ -83,6 +118,9 @@ export default function ManagerPortfolioPage() {
   const [createExp,       { isLoading: creatingExp }]     = useCreateExpMutation();
   const [updateExp,       { isLoading: updatingExp }]     = useUpdateExpMutation();
   const [deleteExp,       { isLoading: deletingExp }]     = useDeleteExpMutation();
+  const [createArticle,   { isLoading: creatingArticle }] = useCreateArticleMutation();
+  const [updateArticle,   { isLoading: updatingArticle }] = useUpdateArticleMutation();
+  const [deleteArticle,   { isLoading: deletingArticle }] = useDeleteArticleMutation();
 
 
 
@@ -112,13 +150,18 @@ export default function ManagerPortfolioPage() {
   const [expForm,     setExpForm]     = useState<UpsertExpRequest>(EMPTY_EXP);
   const [editingExpId,setEditingExpId] = useState<string | null>(null);
 
+  // ── Form: Article (Journalist) ──
+  const [articleForm,      setArticleForm]      = useState<CreateArticleRequest>(EMPTY_ARTICLE);
+  const [articleImageFile,  setArticleImageFile]  = useState<File | null>(null);
+  const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
+  const articleImageRef = useRef<HTMLInputElement>(null);
+
   // Populate portfolio from backend
   useEffect(() => {
     console.log(profileData);
     
     if (profileData) {
       const p = profileData as any;
-      // support both wrapped {data: ...} and unwrapped response
       const portfolio = p?.data ?? p;
       setTitle(portfolio?.title ?? "");
       setBio(portfolio?.bio ?? "");
@@ -217,6 +260,47 @@ export default function ManagerPortfolioPage() {
   const handleDeleteExp = async (id: string) => {
     try { await deleteExp(id).unwrap(); toast.success("Xóa kinh nghiệm!"); }
     catch (err: any) { toast.error(err?.data?.message || "Lỗi xóa kinh nghiệm!"); }
+  };
+
+  // Article — Journalist
+  const handleUpsertArticle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!articleForm.title.trim()) { toast.error("Nhập tiêu đề bài báo!"); return; }
+    if (!articleForm.contentUrl.trim()) { toast.error("Nhập link bài báo!"); return; }
+    if (!articleForm.publisherName.trim()) { toast.error("Nhập tên tòa soạn!"); return; }
+    try {
+      if (editingArticleId) {
+        await updateArticle({
+          id: editingArticleId,
+          title: articleForm.title.trim(),
+          summary: articleForm.summary?.trim() || undefined,
+          contentUrl: articleForm.contentUrl.trim(),
+          publisherName: articleForm.publisherName.trim(),
+          category: articleForm.category || undefined,
+          publishedAt: articleForm.publishedAt || undefined,
+          image: articleImageFile ?? undefined,
+          tags: articleForm.tags?.length ? articleForm.tags : undefined,
+        }).unwrap();
+        toast.success("Cập nhật bài báo!");
+      } else {
+        await createArticle({
+          title: articleForm.title.trim(),
+          summary: articleForm.summary?.trim() || undefined,
+          contentUrl: articleForm.contentUrl.trim(),
+          publisherName: articleForm.publisherName.trim(),
+          category: articleForm.category || undefined,
+          publishedAt: articleForm.publishedAt || undefined,
+          image: articleImageFile ?? undefined,
+          tags: articleForm.tags?.length ? articleForm.tags : undefined,
+        }).unwrap();
+        toast.success("Thêm bài báo mới!");
+      }
+      setArticleForm(EMPTY_ARTICLE); setArticleImageFile(null); setEditingArticleId(null);
+    } catch (err: any) { toast.error(err?.data?.message || "Lỗi lưu bài báo!"); }
+  };
+  const handleDeleteArticle = async (id: string) => {
+    try { await deleteArticle(id).unwrap(); toast.success("Xóa bài báo!"); }
+    catch (err: any) { toast.error(err?.data?.message || "Lỗi xóa bài báo!"); }
   };
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -376,9 +460,23 @@ export default function ManagerPortfolioPage() {
               <motion.div key="theme" initial={{ opacity:0, x:14 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-14 }} transition={{ duration:.28 }}>
                 <div className="space-y-5 max-w-4xl">
                   <div className="pm-card rounded-2xl p-5 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                      <p className="pm-label"><Layout size={11}/>Chọn mẫu giao diện</p>
-                      {selectedTheme&&<span className="text-[10px] font-mono text-[var(--pm)] bg-[var(--pm)]/10 px-2 py-0.5 rounded-full">Selected: {selectedTheme.slice(0,8)}…</span>}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-[var(--pmb)] pb-3">
+                      <div>
+                        <p className="pm-label"><Layout size={11}/>Chọn mẫu giao diện</p>
+                        {selectedTheme&&<span className="text-[10px] font-mono text-[var(--pm)] bg-[var(--pm)]/10 px-2 py-0.5 rounded-full">Selected: {selectedTheme.slice(0,8)}…</span>}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const pubUrl = `${window.location.origin}/portfolio/${user?.id}`;
+                          navigator.clipboard.writeText(pubUrl);
+                          toast.success("Đã sao chép link Portfolio công khai!");
+                        }}
+                        className="pm-btn pm-g py-1.5 px-3 text-xs flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Link2 size={13} />
+                        Sao chép link Portfolio
+                      </button>
                     </div>
                     {/* Currently applied theme info banner */}
                     {(() => {
@@ -405,6 +503,7 @@ export default function ManagerPortfolioPage() {
                             const pf = profileData as any;
                             const currentThemeId = pf?.data?.theme_id ?? pf?.theme_id ?? null;
                             const isCurrentlyApplied = currentThemeId === t.id;
+                            const isMajorMatch = !major || user?.major === major;
 
                             return (
                               <button key={t.id} onClick={()=>setSelectedTheme(t.id)} className={`tc text-left relative flex flex-col ${selectedTheme===t.id?"sel":""} ${isCurrentlyApplied ? "ring-2 ring-green-400 ring-offset-1" : ""}`}>
@@ -420,20 +519,38 @@ export default function ManagerPortfolioPage() {
                                     </div>
                                   )}
                                 </div>
-                                <div className="p-2.5 flex-1 w-full flex flex-col items-start">
+                                <div className="p-2.5 flex-1 w-full flex flex-col items-start gap-1">
                                   <p className="text-[11px] font-bold truncate w-full">{t.name}</p>
                                   {major&&<p className="text-[9px] text-zinc-400 capitalize">{major}</p>}
                                   {!isActive&&<p className="text-[9px] text-red-400 font-bold">Inactive</p>}
                                   {isCurrentlyApplied && (
-                                    <span className="mt-1 text-[9px] font-bold text-green-600 dark:text-green-400 flex items-center gap-0.5">
+                                    <span className="mt-0.5 text-[9px] font-bold text-green-600 dark:text-green-400 flex items-center gap-0.5">
                                       <svg width="8" height="8" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" fill="currentColor" opacity="0.3"/><path d="M3 6L5 8L9 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                       Đang áp dụng
                                     </span>
                                   )}
                                   {ownedTemplate && (
-                                    <div className="mt-2 flex flex-col items-start gap-1">
-                                      <span className="text-[9px] font-bold text-[var(--pm)] bg-[var(--pm)]/10 px-1.5 py-0.5 rounded">Đang sở hữu</span>
-                                      <CountdownTimer expiresAt={ownedTemplate.expires_at} />
+                                    <div className="mt-1 flex flex-col items-start gap-1.5 w-full border-t border-[var(--pmb)] pt-1.5">
+                                      <div className="flex items-center justify-between w-full">
+                                        <span className="text-[9px] font-bold text-[var(--pm)] bg-[var(--pm)]/10 px-1.5 py-0.5 rounded">Đang sở hữu</span>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            router.push(`/portfolio/${user?.id}?themeId=${t.id}`);
+                                          }}
+                                          className="text-[9px] font-bold text-white bg-[var(--pm)] hover:bg-[var(--pm)]/80 px-2 py-0.5 rounded flex items-center gap-0.5 transition-colors cursor-pointer"
+                                        >
+                                          <Eye size={10} /> View
+                                        </button>
+                                      </div>
+                                      <div className="flex flex-col gap-1 w-full">
+                                        <CountdownTimer expiresAt={ownedTemplate.expires_at} />
+                                        {!isMajorMatch && (
+                                          <span className="text-[9px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-900/40 w-fit">
+                                            Khác ngành (Yêu cầu: {major})
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
                                   )}
                                 </div>
@@ -589,6 +706,69 @@ export default function ManagerPortfolioPage() {
                         </div>
                       </div>
                     )) : <div className="flex flex-col items-center justify-center py-10 text-center"><Briefcase size={28} className="text-zinc-300 dark:text-zinc-600 mb-2"/><p className="text-sm text-zinc-400">Chưa có kinh nghiệm nào.</p></div>}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ══════════════════════════════════════════════ ARTICLES (Journalist only) */}
+            {activeSection === "articles" && isJournalist && (
+              <motion.div key="articles" initial={{ opacity:0, x:14 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-14 }} transition={{ duration:.28 }}>
+                <div className="grid grid-cols-1 xl:grid-cols-5 gap-5 max-w-4xl">
+                  {/* Form */}
+                  <form onSubmit={handleUpsertArticle} className="xl:col-span-2">
+                    <div className="pm-card rounded-2xl p-5 shadow-sm space-y-3">
+                      <p className="pm-label"><Newspaper size={11}/>{editingArticleId?"Sửa":"Thêm"} Bài báo</p>
+                      <div><label className="pm-label">Tiêu đề *</label><input className="pm-input" placeholder="VD: Hành trình giải cứu dòng sông..." value={articleForm.title} onChange={e=>setArticleForm(f=>({...f,title:e.target.value}))}/></div>
+                      <div><label className="pm-label"><Link2 size={10}/>Link bài báo *</label><input className="pm-input" type="url" placeholder="https://vnexpress.net/..." value={articleForm.contentUrl} onChange={e=>setArticleForm(f=>({...f,contentUrl:e.target.value}))}/></div>
+                      <div><label className="pm-label"><Building2 size={10}/>Tòa soạn *</label><input className="pm-input" placeholder="VD: VnExpress, Tuổi Trẻ..." value={articleForm.publisherName} onChange={e=>setArticleForm(f=>({...f,publisherName:e.target.value}))}/></div>
+                      <div><label className="pm-label">Tóm tắt (Sapo)</label><textarea className="pm-input resize-none" rows={3} placeholder="Tóm tắt ngắn gọn nội dung bài báo..." value={articleForm.summary??""} onChange={e=>setArticleForm(f=>({...f,summary:e.target.value}))}/></div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="pm-label"><Tag size={10}/>Chuyên mục</label>
+                          <select className="pm-input" value={articleForm.category??""} onChange={e=>setArticleForm(f=>({...f,category:(e.target.value||undefined) as JournalistCategory|undefined}))}>
+                            <option value="">-- Chọn --</option>
+                            {CATEGORY_OPTIONS.map(c=><option key={c.value} value={c.value}>{c.label}</option>)}
+                          </select>
+                        </div>
+                        <div><label className="pm-label"><Calendar size={10}/>Ngày đăng</label><input className="pm-input" type="date" value={articleForm.publishedAt??""} onChange={e=>setArticleForm(f=>({...f,publishedAt:e.target.value}))}/></div>
+                      </div>
+                      <div>
+                        <label className="pm-label">Ảnh thumbnail</label>
+                        <input ref={articleImageRef} type="file" accept="image/*" className="hidden" onChange={e=>setArticleImageFile(e.target.files?.[0]??null)}/>
+                        <button type="button" onClick={()=>articleImageRef.current?.click()} className="pm-btn pm-g text-xs py-2 px-3">
+                          <Plus size={13}/>{articleImageFile?articleImageFile.name:"Chọn ảnh"}
+                        </button>
+                      </div>
+                      <div className="flex gap-2 pt-1">
+                        <button type="submit" disabled={creatingArticle||updatingArticle} className="pm-btn pm-p flex-1 justify-center">{(creatingArticle||updatingArticle)?<Loader2 size={14} className="animate-spin"/>:<Save size={14}/>}Lưu</button>
+                        {editingArticleId&&<button type="button" onClick={()=>{setArticleForm(EMPTY_ARTICLE);setArticleImageFile(null);setEditingArticleId(null);}} className="pm-btn pm-g"><X size={14}/></button>}
+                      </div>
+                    </div>
+                  </form>
+                  {/* Articles list */}
+                  <div className="xl:col-span-3 space-y-2">
+                    <p className="pm-label"><Newspaper size={11}/>Danh sách ({articles?.length??0})</p>
+                    {articlesLoading ? <Loader2 className="animate-spin text-[var(--pm)] mx-auto my-8" size={20}/> : articles&&articles.length>0 ? articles.map((art:JournalistArticle)=>(
+                      <div key={art.id} className="row-card">
+                        <div className="w-9 h-9 rounded-lg overflow-hidden bg-[var(--pm)]/10 flex items-center justify-center shrink-0">
+                          {art.thumbnail_url?<img src={art.thumbnail_url} alt={art.title} className="w-full h-full object-cover"/>:<Newspaper size={16} className="text-[var(--pm)]"/>}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-sm truncate">{art.title}</p>
+                          <p className="text-xs text-zinc-500 truncate">{art.publisher_name}{art.published_at&&` · ${art.published_at.slice(0,10)}`}</p>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            {art.category&&<span className="text-[10px] text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full capitalize">{art.category}</span>}
+                            {art.tags&&art.tags.length>0&&art.tags.slice(0,3).map((tag,i)=><span key={i} className="text-[10px] text-[var(--pm)] bg-[var(--pm)]/10 px-1.5 py-0.5 rounded-full">{tag}</span>)}
+                          </div>
+                          {art.content_url&&<a href={art.content_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-[var(--pm)] flex items-center gap-0.5 hover:underline mt-1"><ExternalLink size={9}/>Xem bài báo</a>}
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          <button onClick={()=>{setArticleForm({title:art.title,contentUrl:art.content_url,publisherName:art.publisher_name,summary:art.summary??"",category:(art.category as JournalistCategory)||undefined,publishedAt:art.published_at?.slice(0,10)??"",tags:(art.tags as any)||[]});setEditingArticleId(art.id);}} className="pm-btn pm-g p-2"><Settings size={13}/></button>
+                          <button onClick={()=>handleDeleteArticle(art.id)} disabled={deletingArticle} className="pm-btn pm-d p-2"><Trash2 size={13}/></button>
+                        </div>
+                      </div>
+                    )) : <div className="flex flex-col items-center justify-center py-10 text-center"><Newspaper size={28} className="text-zinc-300 dark:text-zinc-600 mb-2"/><p className="text-sm text-zinc-400">Chưa có bài báo nào. Thêm bài báo đầu tiên!</p></div>}
                   </div>
                 </div>
               </motion.div>

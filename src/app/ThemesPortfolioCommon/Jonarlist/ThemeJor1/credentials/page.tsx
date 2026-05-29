@@ -1,12 +1,18 @@
 "use client";
 
-const CREDENTIALS = [
+import { useParams } from "next/navigation";
+import { useGetCertificatesQuery, useGetExperiencesQuery } from "@/store/queries/profile";
+import { Loader2 } from "lucide-react";
+
+const DEFAULT_CREDENTIALS = [
   {
     icon: "description",
     title: "Advanced Investigative Journalism",
     subtitle: "Certification of Excellence in High-Stakes Reporting",
     stamp: "CERTIFIED",
     rotate: "-rotate-[2deg]",
+    imageUrl: null as string | null,
+    credentialUrl: "#",
   },
   {
     icon: "workspace_premium",
@@ -14,6 +20,8 @@ const CREDENTIALS = [
     subtitle: "Recognized for 'Impactful Urban Reporting'",
     stamp: "AWARDED",
     rotate: "rotate-[2deg]",
+    imageUrl: null as string | null,
+    credentialUrl: "#",
   },
   {
     icon: "verified",
@@ -21,6 +29,8 @@ const CREDENTIALS = [
     subtitle: "International Reporting Excellence Program",
     stamp: "FELLOWSHIP",
     rotate: "-rotate-[1deg]",
+    imageUrl: null as string | null,
+    credentialUrl: "#",
   },
   {
     icon: "star",
@@ -28,10 +38,12 @@ const CREDENTIALS = [
     subtitle: "Vietnam Journalists Association — Annual Awards",
     stamp: "WINNER",
     rotate: "rotate-[1deg]",
+    imageUrl: null as string | null,
+    credentialUrl: "#",
   },
 ];
 
-const TIMELINE = [
+const DEFAULT_TIMELINE = [
   { year: "2025", event: "Excellent City Journalism Award" },
   { year: "2024", event: "VJA Best Investigative Report" },
   { year: "2023", event: "Reuters Fellowship — London" },
@@ -40,6 +52,50 @@ const TIMELINE = [
 ];
 
 export default function CredentialsPage() {
+  const params = useParams();
+  const finalUserId = (params?.userId as string) || "";
+
+  // Queries
+  const { data: certs, isLoading: certsLoading } = useGetCertificatesQuery(finalUserId, { skip: !finalUserId });
+  const { data: experiences, isLoading: experiencesLoading } = useGetExperiencesQuery(finalUserId, { skip: !finalUserId });
+
+  if (certsLoading || experiencesLoading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#b52426] w-10 h-10" />
+      </div>
+    );
+  }
+
+  const certList = certs || [];
+  const expList = experiences || [];
+
+  const hasLiveCerts = certList.length > 0;
+  const hasLiveExps = expList.length > 0;
+
+  // Map credentials
+  const mappedCredentials = hasLiveCerts
+    ? certList.map((c, index) => ({
+        icon: "verified",
+        title: c.name,
+        subtitle: `${c.organization || ""} ${c.issue_date ? `· ${c.issue_date.slice(0, 7)}` : ""}`,
+        stamp: c.credential_id || "VERIFIED",
+        imageUrl: c.image_url,
+        credentialUrl: c.credential_url || "#",
+        rotate: index % 2 === 0 ? "rotate-[1.5deg]" : "-rotate-[1.5deg]",
+      }))
+    : DEFAULT_CREDENTIALS;
+
+  // Map timeline
+  const mappedTimeline = hasLiveExps
+    ? expList
+        .map((e) => ({
+          year: e.start_date ? e.start_date.substring(0, 4) : "2026",
+          event: `${e.position} tại ${e.company_name}`,
+        }))
+        .sort((a, b) => b.year.localeCompare(a.year))
+    : DEFAULT_TIMELINE;
+
   return (
     <div className="max-w-4xl mx-auto space-y-20">
       {/* ── HEADER ── */}
@@ -70,21 +126,39 @@ export default function CredentialsPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {CREDENTIALS.map((cred) => (
+          {mappedCredentials.map((cred, idx) => (
             <div
-              key={cred.title}
+              key={cred.title + idx}
               className={`relative bg-white p-7 shadow-md border border-[#c6c6cc] flex flex-col items-center text-center hover:scale-[1.03] transition-transform duration-300 ${cred.rotate}`}
             >
-              {/* Icon */}
-              <span className="material-symbols-outlined text-[#b52426] text-[52px] mb-4">
-                {cred.icon}
-              </span>
+              {/* Image or Icon */}
+              {cred.imageUrl ? (
+                <div className="w-16 h-16 rounded overflow-hidden mb-4 border border-[#c6c6cc]">
+                  <img src={cred.imageUrl} alt={cred.title} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <span className="material-symbols-outlined text-[#b52426] text-[52px] mb-4">
+                  {cred.icon}
+                </span>
+              )}
+              
               <h5 className="font-['Playfair_Display'] text-xl font-bold text-[#030813] mb-2 leading-tight">
                 {cred.title}
               </h5>
               <p className="font-['Source_Serif_4'] text-sm text-[#45474c] opacity-80 mb-6">
                 {cred.subtitle}
               </p>
+
+              {cred.credentialUrl && cred.credentialUrl !== "#" && (
+                <a
+                  href={cred.credentialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-[#b52426] hover:underline mb-4 font-['Bricolage_Grotesque']"
+                >
+                  Xem Chứng Chỉ Gốc
+                </a>
+              )}
 
               {/* Ink stamp */}
               <div
@@ -112,14 +186,11 @@ export default function CredentialsPage() {
           <div className="absolute left-[28px] top-0 bottom-0 w-[2px] bg-[#b52426]/20" />
 
           <div className="space-y-8">
-            {TIMELINE.map((item, i) => (
-              <div key={item.year} className="relative flex gap-8 items-start">
+            {mappedTimeline.map((item, i) => (
+              <div key={item.year + i} className="relative flex gap-8 items-start">
                 {/* Dot */}
                 <div
                   className="relative z-10 w-14 h-14 rounded-full bg-white border-[3px] border-[#b52426] flex items-center justify-center shadow-md flex-shrink-0"
-                  style={{
-                    animationDelay: `${i * 0.15}s`,
-                  }}
                 >
                   <span className="font-['Bricolage_Grotesque'] text-[10px] font-bold text-[#b52426] text-center leading-tight">
                     {item.year}
@@ -147,25 +218,20 @@ export default function CredentialsPage() {
         {/* Washi decoration */}
         <div
           className="absolute -top-4 left-8 w-28 h-6 -rotate-[8deg]"
-          style={{ background: "rgba(181,36,38,0.2)" }}
+          style={{ background: "rgba(181, 36, 38, 0.2)" }}
         />
         <blockquote
           className="bg-[#fcf8ed] p-10 md:p-14 shadow-[6px_6px_0_0_rgba(0,0,0,0.08)] -rotate-1"
           style={{
-            clipPath:
-              "polygon(0% 2%, 100% 0%, 100% 98%, 0% 100%)",
+            clipPath: "polygon(0% 2%, 100% 0%, 100% 98%, 0% 100%)",
           }}
         >
           <span className="material-symbols-outlined text-[#b52426] text-[48px] opacity-30 block mb-4">
             format_quote
           </span>
           <p className="font-['Playfair_Display'] text-[22px] md:text-[28px] italic text-[#030813] leading-relaxed">
-            "Journalism is not just a job. It is the ink that writes the first
-            draft of history — and Hai Dang writes it with courage."
+            "Journalism is not just a job. It is the ink that writes the first draft of history."
           </p>
-          <footer className="mt-6 font-['Bricolage_Grotesque'] text-sm text-[#45474c]">
-            — Vietnam Journalists Association, 2025
-          </footer>
         </blockquote>
       </section>
 
@@ -176,7 +242,7 @@ export default function CredentialsPage() {
             The Ledger
           </p>
           <p className="font-['Source_Serif_4'] text-sm text-[#45474c]">
-            © 2024–2026 Hai Dang Journal. All rights reserved.
+            © 2026 Handwritten Newsroom. All rights reserved.
           </p>
         </div>
         <div className="flex gap-6">

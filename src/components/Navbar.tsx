@@ -31,7 +31,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
   const pathname = usePathname();
-  if (pathname?.startsWith("/admin") || pathname === "/auth/admin-login") {
+  if (pathname?.startsWith("/admin") || pathname === "/auth/admin-login" || pathname?.startsWith("/portfolio")) {
     return null;
   }
   const router = useRouter();
